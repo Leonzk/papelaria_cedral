@@ -1,0 +1,6 @@
+@papelaria_backend_HostAddress = http://localhost:5218
+
+GET {{papelaria_backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
