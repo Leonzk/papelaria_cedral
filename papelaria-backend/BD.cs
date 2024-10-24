@@ -6,7 +6,8 @@ namespace papelaria_backend
     {
         public MySqlConnection CriarConexao()
         {
-            string strCon = Environment.GetEnvironmentVariable("CONNECTION_STRING");
+            string strCon = "Server=localhost;Database=papelaria;Uid=root;Pwd=Tvtlnbks09";
+            //string strCon = Environment.GetEnvironmentVariable("CONNECTION_STRING");
             MySqlConnection conexao = new MySqlConnection(strCon);
 
             return conexao;
