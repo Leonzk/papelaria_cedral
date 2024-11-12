@@ -268,5 +268,167 @@ namespace papelaria_backend.Services
             return servico;
         }
 
+        public bool DeletarProduto(int id)
+        {
+            bool sucesso = false;
+
+            var conexao = _bd.CriarConexao();
+
+            MySqlCommand cmd = conexao.CreateCommand();
+
+            cmd.CommandText = $@"delete from produto where item_id = @id;
+                                    delete from item where item_id = @id;
+            ";
+
+            cmd.Parameters.AddWithValue("@id", id);
+            try {
+
+                if (conexao.State != System.Data.ConnectionState.Open)
+                    conexao.Open();
+
+                int qtdeLinhasAfetadas = cmd.ExecuteNonQuery();
+
+                
+
+                sucesso = true;
+            }
+            catch(Exception ex)
+            {
+
+            }
+            finally
+            {
+                conexao.Close();
+            }
+            
+            return sucesso;
+        }
+
+        public bool DeletarServico(int id)
+        {
+            bool sucesso = false;
+
+            var conexao = _bd.CriarConexao();
+
+            MySqlCommand cmd = conexao.CreateCommand();
+            cmd.CommandText = $@"delete from servico where item_id = @id;
+                                    delete from item where item_id = @id;";
+
+            cmd.Parameters.AddWithValue("@id", id);
+            try
+            {
+                if (conexao.State != System.Data.ConnectionState.Open){
+                    conexao.Open();
+                }
+                int qtdeLinhasAfetadas = cmd.ExecuteNonQuery();
+
+                sucesso = true;
+            }
+            catch (Exception ex)
+            {
+
+            }
+            finally
+            {
+                conexao.Close();
+            }
+            return sucesso;
+        }
+
+        public bool AtualizarItem(Entities.Item item)
+        {
+            bool sucesso = false;
+
+            var conexao = _bd.CriarConexao();
+
+            MySqlCommand cmd = conexao.CreateCommand();
+
+            cmd.CommandText = $@"update item set item_nome = @item_nome, item_valor = @item_valor where item_id = @item_id";
+
+            cmd.Parameters.AddWithValue("@item_nome", item.nome);
+            cmd.Parameters.AddWithValue("@item_valor", item.valor);
+            cmd.Parameters.AddWithValue("@item_id", item.id);
+            try
+            {
+                if (conexao.State != System.Data.ConnectionState.Open)
+                    conexao.Open();
+
+                int qtdeLinhasAfetadas = cmd.ExecuteNonQuery();
+
+                sucesso = true;
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                conexao.Close();
+            }
+            return sucesso;
+        }
+
+        public bool AtualizarProduto(Entities.Item.Produto p)
+        {
+            bool sucesso = false;
+
+            var conexao = _bd.CriarConexao();
+
+            MySqlCommand cmd = conexao.CreateCommand();
+            cmd.CommandText = $@"update produto set produto_codbarra = @produto_codbarra where item_id = @item_id";
+
+            cmd.Parameters.AddWithValue("@produto_codbarra", p.cod_barra);
+            cmd.Parameters.AddWithValue("@item_id", p.id);
+
+            try
+            {
+                if (conexao.State != System.Data.ConnectionState.Open)
+                    conexao.Open();
+
+                int qtdeLinhasAfetadas = cmd.ExecuteNonQuery();
+
+                sucesso = true;
+            }
+            catch (Exception ex)
+            {
+
+            }
+            finally
+            {
+                conexao.Close();
+            }
+            return sucesso;
+        }
+
+        public bool AtualizarServico(Entities.Item.Servico s)
+        {
+            bool sucesso = false;
+
+            var conexao = _bd.CriarConexao();
+
+            MySqlCommand cmd = conexao.CreateCommand();
+            cmd.CommandText = $@"update item set servico_disponivel = @servico_disponivel where item_id = @item_id";
+
+            cmd.Parameters.AddWithValue("@servico_disponivel", s.disponivel);
+            cmd.Parameters.AddWithValue("@item_id", s.id);
+            try
+            {
+                if (conexao.State != System.Data.ConnectionState.Open)
+                    conexao.Open();
+
+                int qtdeLinhasAfetadas = cmd.ExecuteNonQuery();
+
+                sucesso = true;
+            }
+            catch (Exception ex)
+            {
+
+            }
+            finally
+            {
+                conexao.Close();
+            }
+            return sucesso;
+        }
     }
 }
