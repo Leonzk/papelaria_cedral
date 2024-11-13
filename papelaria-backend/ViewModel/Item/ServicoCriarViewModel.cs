@@ -1,4 +1,4 @@
-﻿namespace papelaria_backend.ViewModel
+﻿namespace papelaria_backend.ViewModel.Item
 {
     public class ServicoCriarViewModel
     {

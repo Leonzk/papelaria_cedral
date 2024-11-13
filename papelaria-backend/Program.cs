@@ -23,6 +23,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped(typeof(papelaria_backend.Services.ItemServices));
+builder.Services.AddScoped(typeof(papelaria_backend.Services.EstoqueServices));
 
 builder.Services.AddSingleton<papelaria_backend.BD>(new papelaria_backend.BD());
 

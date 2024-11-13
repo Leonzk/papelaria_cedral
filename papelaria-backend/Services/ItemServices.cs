@@ -133,8 +133,7 @@ namespace papelaria_backend.Services
 
             cmd.CommandText = $@"SELECT Item.item_id, Item.item_nome, Item.item_valor, Produto.produto_codbarra as item_codbarra
                                 FROM Item
-                                INNER JOIN Produto ON Item.item_id = Produto.item_id
-                                GROUP BY Item.item_id";
+                                INNER JOIN Produto ON Item.item_id = Produto.item_id";
 
             if (conn.State != System.Data.ConnectionState.Open)
             {
@@ -167,8 +166,7 @@ namespace papelaria_backend.Services
 
             cmd.CommandText = $@"SELECT Item.item_id, Item.item_nome, Item.item_valor, Servico.servico_disponivel as item_disponivel
                                 FROM Item
-                                INNER JOIN Servico ON Item.item_id = Servico.item_id
-                                GROUP BY Item.item_id";
+                                INNER JOIN Servico ON Item.item_id = Servico.item_id";
 
             if (conn.State != System.Data.ConnectionState.Open)
             {
@@ -202,8 +200,7 @@ namespace papelaria_backend.Services
             cmd.CommandText = $@"SELECT Item.item_id, Item.item_nome, Item.item_valor, Produto.produto_codbarra as item_codbarra
                                 FROM Item
                                 INNER JOIN Produto ON Item.item_id = Produto.item_id
-                                WHERE Item.item_id = @id
-                                GROUP BY Item.item_id";
+                                WHERE Item.item_id = @id";
 
             cmd.Parameters.AddWithValue("@id", iditem);
 
@@ -240,7 +237,6 @@ namespace papelaria_backend.Services
                                 FROM Item
                                 INNER JOIN Servico ON Item.item_id = Servico.item_id
                                 WHERE Item.item_id = @id
-                                GROUP BY Item.item_id
             ";
 
             cmd.Parameters.AddWithValue("@id", idservico);
