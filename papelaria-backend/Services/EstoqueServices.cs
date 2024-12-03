@@ -139,7 +139,15 @@ namespace papelaria_backend.Services
                 estoques.Add(new Estoque()
                 {
                     id = Convert.ToInt32(dr["estoque_id"]),
-                    quant = Convert.ToInt32(dr["quantidade"])
+                    id_produto = Convert.ToInt32(dr["item_id"]),
+                    quant = Convert.ToInt32(dr["quantidade"]),
+                    estoque_produto = new Item.Produto()
+                    {
+                        id = Convert.ToInt32(dr["item_id"]),
+                        nome = dr["item_nome"].ToString(),
+                        valor = (float)dr["item_valor"],
+                        cod_barra = dr["item_codbarra"].ToString()
+                    }
                 });
             }
             conn.Close();
@@ -173,8 +181,58 @@ namespace papelaria_backend.Services
 
                 estoque = new Estoque()
                 {
-                    id_produto = Convert.ToInt32(dr["estoque_id"]),
-                    quant = Convert.ToInt32(dr["quantidade"])
+                    id = Convert.ToInt32(dr["estoque_id"]),
+                    id_produto = Convert.ToInt32(dr["item_id"]),
+                    quant = Convert.ToInt32(dr["quantidade"]),
+                    estoque_produto = new Item.Produto(){
+                        id = Convert.ToInt32(dr["item_id"]),
+                        nome = dr["item_nome"].ToString(),
+                        valor = (float)dr["item_valor"],
+                        cod_barra = dr["item_codbarra"].ToString()
+                    }
+                };
+            }
+            conn.Close();
+
+            return estoque;
+        }
+
+        public Estoque? ObterEstoqueCodBarra(string iditem)
+        {
+            var conn = _bd.CriarConexao();
+
+            MySqlCommand cmd = conn.CreateCommand();
+
+            cmd.CommandText = $@"SELECT Item.item_id, Item.item_nome, Item.item_valor, Produto.produto_codbarra as item_codbarra, Estoque.estoque_quant as quantidade, Estoque.estoque_id
+                                FROM Item
+                                INNER JOIN Produto ON Item.item_id = Produto.item_id
+                                INNER JOIN Estoque ON Produto.item_id = Estoque.produtoItem_id
+                                WHERE Produto.produto_codbarra = @id";
+
+            cmd.Parameters.AddWithValue("@id", iditem);
+
+            if (conn.State != System.Data.ConnectionState.Open)
+            {
+                conn.Open();
+            }
+
+            MySqlDataReader dr = cmd.ExecuteReader();
+            Estoque? estoque = null;
+            if (dr.Read())
+            {
+
+                estoque = new Estoque()
+                {
+                    id = Convert.ToInt32(dr["estoque_id"]),
+                    id_produto = Convert.ToInt32(dr["item_id"]),
+                    quant = Convert.ToInt32(dr["quantidade"]),
+                    estoque_produto = new Item.Produto()
+                    {
+                        id = Convert.ToInt32(dr["item_id"]),
+                        nome = dr["item_nome"].ToString(),
+                        valor = (float)dr["item_valor"],
+                        cod_barra = dr["item_codbarra"].ToString()
+                    }
                 };
             }
             conn.Close();

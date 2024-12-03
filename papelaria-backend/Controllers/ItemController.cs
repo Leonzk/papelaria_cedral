@@ -74,7 +74,7 @@ namespace papelaria_backend.ViewModel.Item
             }
         }
 
-        [HttpPut("produto/{id}")]
+        [HttpPost("produto/atualizar/{id}")]
         public IActionResult AtualizarProduto([FromBody] ProdutoAtualizarViewModel produtoVM, int id)
         {
             Entities.Item item = new Entities.Item();
@@ -112,7 +112,7 @@ namespace papelaria_backend.ViewModel.Item
             }
         }
 
-        [HttpDelete("produto/{id}")]
+        [HttpPost("produto/deletar/{id}")]
         public IActionResult DeletarProduto(int id)
         {
             bool sucesso = false;

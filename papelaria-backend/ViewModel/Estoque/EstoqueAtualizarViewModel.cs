@@ -3,7 +3,6 @@
     public class EstoqueAtualizarViewModel
     {
         public int quant { get; set; }
-        public int item_id { get; set; }
 
         public EstoqueAtualizarViewModel() { }
     }
