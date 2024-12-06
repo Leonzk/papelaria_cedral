@@ -4,3 +4,13 @@
     max-height: 10vh;
     display: flex;
 }
+
+.navbarcolor{
+    background-color: #0F4C81;
+}
+
+.fadein{
+    transition-property: left, top, transform;
+    transition-duration: 250ms, 250ms, 100ms;
+    transform: scale(1);
+}

@@ -1,25 +1,68 @@
 "use client"
 
-//import "./page.css"
+import "./page.css"
 import Link from "next/link";
 import Cabecalho from "../components/cabecalho/page";
 import { useEffect, useState } from "react";
 import ReactModal from 'react-modal';
 import MaskedInput from 'react-text-mask';
+import Footer from "../components/footer/page";
+import {Button,TableBody,TableRow,TableCell, IconButton, TableFooter, TablePagination, Table,TableHead,Paper,Tooltip,Typography,CircularProgress, TextField,} from "@material-ui/core";
+import { Box, Modal, Tab, Tabs } from "@mui/material";
+import { AddShoppingCart } from "@mui/icons-material";
+import PropTypes from 'prop-types';
+import Divider from '@mui/material/Divider';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+
+function CustomTabPanel(props) {
+    const { children, value, index, ...other } = props;
+  
+    return (
+      <div
+        role="tabpanel"
+        hidden={value !== index}
+        id={`simple-tabpanel-${index}`}
+        aria-labelledby={`simple-tab-${index}`}
+        {...other}
+      >
+        {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+      </div>
+    );
+  }
+
+CustomTabPanel.propTypes = {
+    children: PropTypes.node,
+    index: PropTypes.number.isRequired,
+    value: PropTypes.number.isRequired,
+  };
+  
+  function a11yProps(index) {
+    return {
+      id: `simple-tab-${index}`,
+      'aria-controls': `simple-tabpanel-${index}`,
+    };
+  }
 
 export default function Postagens(props){
 
     const [errorItem, seterrorItem] = useState(false)
-    const [stateEditar, setStateEditar] = useState(false);
-    const [stateNovo, setStateNovo] = useState(false)
     const [stateModal, setstateModal] = useState(false);
     const [stateItem, setStateItem] = useState()
-    const [stateItemId, setStateItemId] = useState("");
+    const [stateView, setStateView] = useState([]);
     const [stateItens, setStateItens] = useState([]);
+    const [stateVendas, setStateVendas] = useState([]);
     const [stateTotal, setStateTotal] = useState(0);
     const [filtro, setFiltro] = useState("");
     useEffect(() => {
-        
+        fetch("http://localhost:5218/api/venda")
+        .then(r => r.json())
+        .then(r =>{
+            setStateVendas(r);
+            setStateTotal(r.length);
+            
+            console.log(r);
+        });
     }, []);
 
     const cnpjmask = [/[1-9]/,/[1-9]/," ", /[1-9]/,/[1-9]/,/[1-9]/," ", /[1-9]/,/[1-9]/,/[1-9]/,"/","0","0","0","1","-",/[1-9]/,/[1-9]/];
@@ -58,7 +101,7 @@ export default function Postagens(props){
         console.log(e)
         const log = stateItens.filter(item => item.id !== e)
         console.log(log)
-        setStateItens(stateItens => stateItens.filter(item => item.index !== e));
+        setStateItens(stateItens => stateItens.filter(item => item.id !== e));
       };
 
     const handleFiltrar = (event) => {
@@ -66,11 +109,25 @@ export default function Postagens(props){
         setFiltro(valor);
     };
 
+    async function handleModalOpen(id){
+        await fetch(`http://localhost:5218/venda/${id}`)
+        .then(r => r.json())
+            .then(r =>{
+                setStateView(r);
+                console.log(r);
+            });
+        setstateModal(true)
+    }
+
+    function handleModalClose(){
+        setstateModal(false)
+    }
+
     async function handleVenda(){
         
         const valores = stateItens.map((item) => item);
         console.log(valores)
-
+        var valorfinal = 0;
         for(var i=0; i<valores.length; i++){
             const requestOptions = {
                 method: 'POST',
@@ -80,81 +137,203 @@ export default function Postagens(props){
                 'Accept': 'application/json'
                 }),
             };
-
-            const response = fetch(`http://localhost:5218/api/estoque/venda/${valores[i].estoque_produto.id}`, requestOptions);
-            console.log(response);
+            valorfinal +=  (valores[i].estoque_produto.valor*valores[i].quant);
+            const response = await fetch(`http://localhost:5218/api/estoque/venda/${valores[i].estoque_produto.id}`, requestOptions);
         }
+
+            const requestOptions2 = {
+                method: 'POST',
+                body: JSON.stringify({valor: valorfinal}),
+                headers: new Headers({
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+                }),
+            };
+
+            await fetch(`http://localhost:5218/api/venda/`, requestOptions2)
+            .then(r => r.json())
+            .then(r =>{
+                
+                setStateTotal(r.length);
+                for(var i=0; i<valores.length; i++){
+                    const requestOptions3 = {
+                        method: 'POST',
+                        body: JSON.stringify({id_item: valores[i].estoque_produto.id,
+                            id_venda: r.id,
+                            quant: valores[i].quant
+                        }),
+                        headers: new Headers({
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                        }),
+                    };
+
+                    fetch(`http://localhost:5218/api/itemvenda/`, requestOptions3)
+                }
+            
+            console.log(r);
+        });
+        
 
         alert("Venda Realizada Com Sucesso")
     }
+    const [value, setValue] = useState(0);
+
+    const handleChange = (event, newValue) => {
+        setValue(newValue);
+    };
+
 
   return (
     <div>
       <Cabecalho></Cabecalho>
       
-      <div className="principal">
-        <h2 className="pb-3 ml-5 mb-3 mr-5">Venda</h2>
+      <div className="principal h-100">
+        <br></br>
         <div className="container w-100">
-            <div className="flexcontainer w-100">
+            <Modal className="mx-auto" open={stateModal} onClose={() => handleModalClose()}>
+                    <Box className="rounded bg-white w-50 mt-5 shadow d-flex flex-column p-3 justify-content-center mx-auto">
+                        <div className=" mb-3">
+                                <Divider>Itens Dentro da venda</Divider>
+                        </div>
+                        <div className="form-body">
+                        {stateView.map((item, index) => (
 
-                <div>Total de Itens: {stateItens.length}</div>
+                            <div className="d_flex flex-column">
+                                <List className="d_flex flex-row mx-auto align-item-center">
+                                    <ListItem alignItems="center">Nome = {item.item.nome}</ListItem>
+
+                                    <ListItem alignItems="center">Quantidade = {item.quant}</ListItem>
+                                </List>
+                                
+                                <List>
+                                    <ListItem>Valor Un. = {item.item.valor}</ListItem>
+
+                                    <ListItem>Valor Total = {(item.item.valor * item.quant)}</ListItem>
+                                </List>
+                                <Divider>Item {index+1}</Divider>
+                            </div>
+                            
+                        ))}
+                        </div>
+                    </Box>
+                </Modal>
+
+            <div className="flexcontainer w-100">
+                
+                <Box sx={{width: "100%", borderBottom: 1, borderColor: 'divider' }}>
+                    <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+                    <Tab className="px-3" label="Realizar Venda" {...a11yProps(0)} />
+                    <Tab className="px-3" label="Gerenciamento de Vendas" {...a11yProps(1)} />
+                    </Tabs>
+                </Box>
+                
+                <CustomTabPanel value={value} index={0}>
                 <div className="d-flex flex-row">
-                    <div className="input-group mb-3 w-100" style={{height: "3vh" }}>
-                        <br></br>
-                        <input onChange={handleFiltrar} value={filtro} type="text" className="form-control" placeholder="Digite o Código de Barra"/>
-                        <div className="">
-                            <button onClick={handleFiltro}className="btn mx-2" id="botao" type="button">Adicionar</button>
+                    <div className="divpesquisa d-flex flex-column" style={{height: "3vh" }}>
+                        <div>
+                            <TextField onChange={handleFiltrar} value={filtro} type="text" id="standard-basic" label="Código de Barras" variant="standard" className="form-control"/>
+                        </div>
+                        <div className="mt-3">
+                            <center>
+                                <Button onClick={handleFiltro} className="btn mx-2" id="botao" variant="contained" color="primary">Adicionar - <AddShoppingCart/></Button>
+                            </center>
                         </div>
                     </div>
+
                     
-                    <table className="table">
-                        <thead>
-                            <tr>
-                                <th><center>Produto Id</center></th>
-                                <th><center>Nome</center></th>
-                                <th><center>Cod. Barras</center></th>
-                                <th><center>Valor</center></th>
-                                <th><center>Quantidade</center></th>
-                                <th><button onClick={handleVenda} type="button" className="btn btn-success">Realizar Venda</button></th>
-                            </tr>
-                        </thead>
-                        <tbody className="tablebody">
+                    <Table className="tableresultado shadow p-5 mb-5 bg-white rounded">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell><center>ID</center></TableCell>
+                                <TableCell><center>Nome</center></TableCell>
+                                <TableCell><center>Cod. Barras</center></TableCell>
+                                <TableCell><center>Valor</center></TableCell>
+                                <TableCell><center>Quantidade</center></TableCell>
+                                <TableCell><Button onClick={handleVenda} type="button" variant="contained" color="success">Realizar Venda</Button></TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
                             {stateItens.map((item, index) => (
-                                <tr key={index}>
-                                    <td hidden>{index}</td>
-                                    <td>{item.id}</td>
-                                    <td>{item.estoque_produto.nome}</td>
-                                    <td>{item.estoque_produto.cod_barra}</td>
-                                    <td>{item.estoque_produto.valor}</td>
-                                    <td>{item.quant}</td>
-                                    <th className="d-flex flex-row flex-row-reverse">
-                                        <button 
-                                            type="button"
-                                            className={"btn btn-outline-secondary mx-2 "}
-                                            onClick={() => handleRemoveItem(index)}
-                                            >X</button>
-                                    </th>
-                                </tr>
+                                <TableRow key={index}>
+                                    <TableCell hidden>{index}</TableCell>
+                                    <TableCell><center>{item.id}</center></TableCell>
+                                    <TableCell><center>{item.estoque_produto.nome}</center></TableCell>
+                                    <TableCell><center>{item.estoque_produto.cod_barra}</center></TableCell>
+                                    <TableCell><center>{item.estoque_produto.valor}</center></TableCell>
+                                    <TableCell><center>{item.quant}</center></TableCell>
+                                    <TableCell className="d-flex flex-row flex-row-reverse">
+                                    <center><Button 
+                                            variant="outlined"
+                                            className={"mx-2"}
+                                            onClick={() => handleRemoveItem(item.id)}
+                                            >X</Button></center>
+                                    </TableCell>
+                                </TableRow>
                             ))}
 
 
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                        </TableBody>
+                        <TableFooter>
+                            <TableRow>
+                                <TableCell>Total de Itens: {stateItens.length}</TableCell>
+                                <TablePagination rowsPerPage={20} page={0} count={stateItens.length}  />
+                            </TableRow>
+                        </TableFooter>
+                    </Table>
                     
                 </div>
+                </CustomTabPanel>
+
+                <CustomTabPanel value={value} index={1}>
+                    <br></br>
+                    <div className="input-group mb-3 w-100">
+                        <TextField onChange={handleFiltrar} value={filtro} type="text" className="form-control" id="standard-basic" label="Filtro" variant="standard"   />
+                        
+                        <Button variant="contained" color="primary" onClick={handleFiltro} className="ml-2">Pesquisar</Button>
+                    
+                    </div>
+                    <Table className="shadow p-5 mb-5 bg-white rounded">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell><center>Venda Id</center></TableCell>
+                                <TableCell><center>Data</center></TableCell>
+                                <TableCell><center>Valor</center></TableCell>
+                                <TableCell className="right"><center>Ver Itens</center></TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {stateVendas.map((item, index) => (
+                                <TableRow key={index}>
+                                    <TableCell><center>{item.id}</center></TableCell>
+                                    <TableCell><center>{(item.data).substring(11,19)+" | "+(item.data).substring(0,10).split('-')[2] +"/"+(item.data).substring(0,10).split('-')[1] +"/"+(item.data).substring(0,10).split('-')[0]}</center></TableCell>
+                                    <TableCell><center>{item.valor}</center></TableCell>
+                                    <TableCell className="d-flex flex-row flex-row-reverse">
+                                    <center>
+                                        <Button 
+                                            variant="outlined"
+                                            className={"mx-2"}
+                                            onClick={() => handleModalOpen(item.id)}
+                                            >🖉 Ver Itens da Venda</Button>
+                                    </center>        
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+
+
+                        </TableBody>
+                        <TableFooter>
+                            <TableRow>
+                                <TableCell>Registros {stateVendas.length}/{stateTotal}</TableCell>
+                                <TablePagination rowsPerPage={20} page={0} count={stateItens.length}  />
+                            </TableRow>
+                        </TableFooter>
+                    </Table>
+                </CustomTabPanel>
             </div>
         </div>
       </div>
-      
+      <Footer/>
     </div>
   );
 }

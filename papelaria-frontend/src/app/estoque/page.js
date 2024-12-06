@@ -3,9 +3,12 @@
 import "./page.css"
 import Link from "next/link";
 import Cabecalho from "../components/cabecalho/page";
+import Footer from "../components/footer/page";
 import { useEffect, useState } from "react";
 import ReactModal from 'react-modal';
 import MaskedInput from 'react-text-mask';
+import {Button,TableBody,TableRow,TableCell, IconButton, TableFooter, TablePagination, Table,TableHead,Paper,Tooltip,Typography,CircularProgress, TextField,} from "@material-ui/core";
+import { Box, Modal } from "@mui/material";
 
 export default function Postagens(props){
 
@@ -85,14 +88,14 @@ export default function Postagens(props){
         seterrorItem(false)
             const requestOptions = {
                 method: 'POST',
-                body: JSON.stringify({quant: stateItem.quant}),
+                body: JSON.stringify({quant: parseInt(stateItem.quant)}),
                 headers: new Headers({
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
                 }),
             };
 
-            const response = await fetch(`http://localhost:5218/api/item/produto/atualizar/${id}`, requestOptions);
+            const response = await fetch(`http://localhost:5218/api/estoque/atualizar/${id}`, requestOptions);
             console.log(response);
 
 
@@ -139,72 +142,77 @@ export default function Postagens(props){
       <Cabecalho></Cabecalho>
       
       <div className="principal">
-        <h2 className="pb-3 ml-5 mb-3 mr-5">Gerenciamento de Estoque</h2>
+        <br></br>
         <div className="container w-100">
             <div className="flexcontainer w-100">
-                <ReactModal ariaHideApp={false} isOpen={stateEditar}>
-                    <div className="w-100 d-flex justify-content-between mb-3 w-50">
+                <Modal onClose={() => handleEditarClose()} open={stateEditar}>
+                    <Box className="rounded bg-white w-50 mt-5 shadow d-flex flex-column p-3 justify-content-center mx-auto">
                         <h2>Atualizar Estoque</h2>
-                        <button 
-                            type="button"
-                            className={"btn btn-outline-secondary mx-2 "}
-                            onClick={() => handleEditarClose()}
-                            >X Fechar</button>
-                    </div>
-                    <div className="form-body">
-                        <label htmlFor="quant" className="form-label">Quantidade</label>
-                        <div className="input-group mb-3">
-                            <input value={stateItem.quant} onChange={(e)=> setStateItem((stateItem) => ({...stateItem, quant: e.target.value}))} type="text" className="form-control" id="quant"/>
+                    
+                        <div className="form-body">
+                            <label htmlFor="quant" className="form-label">Quantidade</label>
+                            <div className="input-group mb-3">
+                                <TextField value={stateItem.quant} onChange={(e)=> setStateItem((stateItem) => ({...stateItem, quant: e.target.value}))} type="numver" className="form-control" id="quant"/>
+                            </div>
                         </div>
-                    </div>
-                    <div className="form-footer">
-                        <button onClick={() => handleEditarSalvar(stateItemId)} type="button" className="btn btn-primary">Alterar</button>
-                    </div>
-                    {errorItem ?<p className="mt-3 text-danger">Formulário incorreto</p> : <></>}
-                </ReactModal>
+                        <div className="form-footer">
+                            <button onClick={() => handleEditarSalvar(stateItemId)} type="button" className="btn btn-primary">Alterar</button>
+                        </div>
+                        {errorItem ?<p className="mt-3 text-danger">Formulário incorreto</p> : <></>}
+                    </Box>
+                </Modal>
 
                 <div className="input-group mb-3 w-100">
-                    <input onChange={handleFiltrar} value={filtro} type="text" className="form-control" placeholder="Pesquisar"/>
-                    <div className="">
-                        <button onClick={handleFiltro}className="btn mx-2" type="button">Pesquisar</button>
-                    </div>
+                    <TextField onChange={handleFiltrar} value={filtro} type="text" className="form-control" id="standard-basic" label="Filtro" variant="standard"   />
+                    
+                    <Button variant="contained" color="primary" onClick={handleFiltro} className="ml-2">Pesquisar</Button>
+                
                 </div>
                 <div>Registros {stateItens.length}/{stateTotal}</div>
-                <table className="table">
-                    <thead>
-                        <tr>
-                            <th>Produto Id</th>
-                            <th>Nome</th>
-                            <th>Codigo de Barras</th>
-                            <th>Quantidade em Estoque</th>
-                        </tr>
-                    </thead>
-                    <tbody className="tablebody">
+                <Table className="shadow p-5 mb-5 bg-white rounded">
+                    <TableHead>
+                        <TableRow>
+                            <TableCell><center>Produto Id</center></TableCell>
+                            <TableCell><center>Nome</center></TableCell>
+                            <TableCell><center>Codigo de Barras</center></TableCell>
+                            <TableCell><center>Quantidade em Estoque</center></TableCell>
+                            <TableCell className="right"><center>Atualizar</center></TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
                         {stateItens.map((item, index) => (
-                            <tr key={index}>
-                                <td>{item.estoque_produto.id}</td>
-                                <td>{item.estoque_produto.nome}</td>
-                                <td>{item.estoque_produto.cod_barra}</td>
-                                <td>{item.quant}</td>
-                                <th className="d-flex flex-row flex-row-reverse">
-                                    <button 
-                                        type="button"
-                                        className={"btn btn-outline-secondary mx-2 "}
+                            <TableRow key={index}>
+                                <TableCell><center>{item.estoque_produto.id}</center></TableCell>
+                                <TableCell><center>{item.estoque_produto.nome}</center></TableCell>
+                                <TableCell><center>{item.estoque_produto.cod_barra}</center></TableCell>
+                                <TableCell><center>{item.quant}</center></TableCell>
+                                <TableCell className="d-flex flex-row flex-row-reverse">
+                                <center>
+                                    <Button 
+                                        variant="outlined"
+                                        className={"mx-2"}
                                         onClick={() => handleEditarOpen(item.estoque_produto.id)}
-                                        >🖉 Atualizar Estoque</button>
-                                </th>
-                            </tr>
+                                        >🖉 Atualizar Estoque</Button>
+                                </center>        
+                                </TableCell>
+                            </TableRow>
                         ))}
 
 
-                    </tbody>
-                </table>
+                    </TableBody>
+                    <TableFooter>
+                        <TableRow>
+                            <TableCell>Registros {stateItens.length}/{stateTotal}</TableCell>
+                            <TablePagination rowsPerPage={20} page={0} count={stateItens.length}  />
+                        </TableRow>
+                    </TableFooter>
+                </Table>
                 {stateItens.length==0 ?<h2>Sem Resultados</h2> : <></>}
             </div>
             
         </div>
       </div>
-      
+      <Footer/>
     </div>
   );
 }

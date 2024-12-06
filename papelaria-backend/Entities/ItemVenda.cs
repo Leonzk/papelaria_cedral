@@ -6,6 +6,8 @@
         public int id_item { get; set; }
         public int id_venda { get; set; }
 
+        public int quant { get; set; }
+
         public virtual Item item { get; set; }
 
         public virtual Venda venda { get; set; }

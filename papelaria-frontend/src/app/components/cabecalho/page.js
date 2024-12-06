@@ -2,31 +2,58 @@
 
 import "./page.css"
 import Link from "next/link";
-
+import HomeIcon from '@mui/icons-material/Home';
+import CategoryIcon from '@mui/icons-material/Category';
+import Inventory2Icon from '@mui/icons-material/Inventory2';
+import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import { ListItemButton, ListItemIcon } from "@mui/material";
 export default function Cabecalho() {
-  return (
-    <nav className="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-        <Link className="nav-link navbar-brand" href="/">Papelaria Cedral</Link>
-      <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-        <span className="navbar-toggler-icon"></span>
-      </button>
 
-      <div className="collapse navbar-collapse" id="navbarsExampleDefault">
-        <ul className="navbar-nav mr-auto">
-          <li className="nav-item active">
-            <Link className="nav-link" href="/">Home <span className="sr-only">(current)</span></Link>
-          </li>
-          <li className="nav-item">
-            <Link className="nav-link" href="/item/produto">Produto</Link>
-          </li>
-          <li className="nav-item">
-            <Link className="nav-link" href="/estoque">Estoque</Link>
-          </li>
-          <li className="nav-item">
-            <Link className="nav-link" href="/venda">Venda</Link>
-          </li>
-        </ul>
+  return (
+    <nav className="navbar navbar-expand-md navbarcolor navbar-dark fixed-top shadow">
+      <div className="w-100 d-flex justify-content-between">
+        <div>
+            <Link className="nav-link navbar-brand" href="/">Papelaria Cedral</Link>
+        </div>
+        <List className="navbar-nav ml-auto">
+
+            
+            <ListItem className="nav-item active">
+              <ListItemButton  className="nav-link" href="/">
+                <HomeIcon/>Home <span className="sr-only">(current)</span>
+                
+              </ListItemButton>
+            </ListItem>
+            <ListItem>
+              <div>|</div>
+            </ListItem>
+            <ListItem className="nav-item">
+              <ListItemButton className="nav-link" href="/item/produto">
+              <CategoryIcon/>Produto<span></span>
+              </ListItemButton>
+            </ListItem>
+            <ListItem>
+              <div>|</div>
+            </ListItem>
+            <ListItem className="nav-item">
+              
+              <ListItemButton className="nav-link" href="/estoque"><Inventory2Icon/> Estoque
+              
+              </ListItemButton>
+            </ListItem>
+            <ListItem>
+              <div>|</div>
+            </ListItem>
+            <ListItem className="nav-item">
+              <ListItemButton className="nav-link" href="/venda"> <PointOfSaleIcon/> Venda
+             
+              </ListItemButton>
+            </ListItem>
+          </List>
       </div>
+      
     </nav>
   );
 }

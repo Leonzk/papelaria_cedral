@@ -191,6 +191,40 @@ namespace papelaria_backend.Services
             return servicos;
         }
 
+        public Item? ObterItem(int iditem)
+        {
+            var conn = _bd.CriarConexao();
+
+            MySqlCommand cmd = conn.CreateCommand();
+
+            cmd.CommandText = $@"SELECT Item.item_id, Item.item_nome, Item.item_valor
+                                FROM Item
+                                WHERE Item.item_id = @id";
+
+            cmd.Parameters.AddWithValue("@id", iditem);
+
+            if (conn.State != System.Data.ConnectionState.Open)
+            {
+                conn.Open();
+            }
+
+            MySqlDataReader dr = cmd.ExecuteReader();
+            Item? item = null;
+            if (dr.Read())
+            {
+
+                item = new Item()
+                {
+                    id = Convert.ToInt32(dr["item_id"]),
+                    nome = dr["item_nome"].ToString(),
+                    valor = (float)dr["item_valor"]
+                };
+            }
+            conn.Close();
+
+            return item;
+        }
+
         public Item.Produto? ObterProduto(int iditem)
         {
             var conn = _bd.CriarConexao();
