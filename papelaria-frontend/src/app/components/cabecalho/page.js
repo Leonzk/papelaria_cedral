@@ -9,10 +9,18 @@ import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import { ListItemButton, ListItemIcon } from "@mui/material";
+import { useState } from "react";
+
 export default function Cabecalho() {
 
+  const [activeButton, setActiveButton] = useState('');
+
+  const handleButtonClick = (buttonName) => {
+    setActiveButton(buttonName);
+  };
+  
   return (
-    <nav className="navbar navbar-expand-md navbarcolor navbar-dark fixed-top shadow">
+    <nav style={{height: "7%"}} className="navbar navbar-expand-md navbarcolor navbar-dark shadow">
       <div className="w-100 d-flex justify-content-between">
         <div>
             <Link className="nav-link navbar-brand" href="/">Papelaria Cedral</Link>
@@ -20,35 +28,48 @@ export default function Cabecalho() {
         <List className="navbar-nav ml-auto">
 
             
-            <ListItem className="nav-item active">
-              <ListItemButton  className="nav-link" href="/">
-                <HomeIcon/>Home <span className="sr-only">(current)</span>
+            <ListItem className={`nav-item ${activeButton === 'home' ? 'active' : ''}`}>
+              <ListItemButton onClick={() => handleButtonClick('home')}  className="nav-link" href="/">
+                <div className="d-flex flex-row">
+                <HomeIcon/>
+                <div><span className="sr-only">(current)</span>Home</div>
+                </div>
+                
                 
               </ListItemButton>
             </ListItem>
             <ListItem>
               <div>|</div>
             </ListItem>
-            <ListItem className="nav-item">
-              <ListItemButton className="nav-link" href="/item/produto">
-              <CategoryIcon/>Produto<span></span>
+            <ListItem className={`nav-item ${activeButton === 'produto' ? 'active' : ''}`}>
+              <ListItemButton onClick={() => handleButtonClick('produto')} className="nav-link" href="/item/produto">
+              <div className="d-flex flex-row">
+              <CategoryIcon/>
+              <div>Produto<span></span></div>
+              </div>
               </ListItemButton>
             </ListItem>
             <ListItem>
               <div>|</div>
             </ListItem>
-            <ListItem className="nav-item">
-              
-              <ListItemButton className="nav-link" href="/estoque"><Inventory2Icon/> Estoque
-              
+            <ListItem className={`nav-item ${activeButton === 'estoque' ? 'active' : ''}`}>
+              <ListItemButton onClick={() => handleButtonClick('estoque')} className="nav-link" href="/estoque">
+              <div className="d-flex flex-row">
+              <Inventory2Icon/> 
+              <div>Estoque<span></span></div>
+              </div>
               </ListItemButton>
             </ListItem>
             <ListItem>
               <div>|</div>
             </ListItem>
-            <ListItem className="nav-item">
-              <ListItemButton className="nav-link" href="/venda"> <PointOfSaleIcon/> Venda
-             
+            <ListItem className={`nav-item ${activeButton === 'venda' ? 'active' : ''}`}>
+              <ListItemButton onClick={() => handleButtonClick('venda')} className="nav-link" href="/venda">
+              <div className="d-flex flex-row">
+                <PointOfSaleIcon/> 
+                <div>Venda<span>
+                  </span></div>
+              </div>
               </ListItemButton>
             </ListItem>
           </List>

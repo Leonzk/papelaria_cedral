@@ -4,7 +4,7 @@
     {
         public string nome { get; set; }
         public float valor { get; set; }
-        public bool? disponivel { get; set; }
+        public bool ?disponivel { get; set; }
 
         public ServicoCriarViewModel() { }
     }

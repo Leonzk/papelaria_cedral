@@ -131,5 +131,116 @@ namespace papelaria_backend.ViewModel.Item
         }
 
         //CONTROLLERS DE SERVIÇO
+
+        [HttpPost("servico")]
+        public IActionResult CriarServico([FromBody] ServicoCriarViewModel servicoVM)
+        {
+            Entities.Item item = new Entities.Item();
+            item.nome = servicoVM.nome;
+            item.valor = servicoVM.valor;
+
+            var sucesso1 = _itemServices.SalvarItem(item);
+
+            Entities.Item.Servico servico = new Entities.Item.Servico()
+            {
+                id = item.id,
+                nome = item.nome,
+                valor = item.valor,
+                disponivel = (bool)servicoVM.disponivel
+            };
+
+            var sucesso2 = _itemServices.SalvarServico(servico);
+
+            if (!sucesso1 || !sucesso2)
+            {
+                return UnprocessableEntity();
+            }
+            else
+            {
+                servico = _itemServices.ObterServico(item.id);
+                return Ok(servico);
+            }
+        }
+
+        [HttpGet("servico")]
+        public IActionResult ObterServicos()
+        {
+            var servico = _itemServices.ObterTodosServicos();
+            if (servico == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(servico);
+            }
+        }
+
+        [HttpGet("servico/{id}")]
+        public IActionResult ObterServico(int id)
+        {
+            var servico = _itemServices.ObterServico(id);
+            if (servico == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(servico);
+            }
+        }
+
+        [HttpPost("servico/atualizar/{id}")]
+        public IActionResult AtualizarServico([FromBody] ServicoAtualizarViewModel servicoVM, int id)
+        {
+            Entities.Item item = new Entities.Item();
+
+            Entities.Item.Servico servico = _itemServices.ObterServico(id);
+
+            item.id = id;
+            if (servicoVM.nome != "") { item.nome = servicoVM.nome; } else { item.nome = servico.nome; }
+            if (servicoVM.valor != 0) { item.valor = servicoVM.valor; } else { item.valor = servico.valor; }
+
+
+            var sucesso1 = _itemServices.AtualizarItem(item);
+
+
+            Entities.Item.Servico servicoatt = new Entities.Item.Servico()
+            {
+                id = item.id,
+                nome = item.nome,
+                valor = item.valor,
+            };
+
+            var sucesso2 = _itemServices.AtualizarServico(servicoatt);
+
+            if (!sucesso1 || !sucesso2)
+            {
+                return UnprocessableEntity();
+            }
+            else
+            {
+                servico = _itemServices.ObterServico(item.id);
+                return Ok(servico);
+            }
+        }
+
+        [HttpPost("servico/deletar/{id}")]
+        public IActionResult DeletarServico(int id)
+        {
+            bool sucesso = false;
+
+            sucesso = _itemServices.DeletarServico(id);
+
+            if (sucesso)
+            {
+                return Ok();
+            }
+            else
+            {
+                return UnprocessableEntity();
+            }
+
+        }
     }
 }

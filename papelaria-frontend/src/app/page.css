@@ -1,0 +1,263 @@
+@keyframes fadeIn {
+    0% { opacity: 0; } 
+    100% { opacity: 1; }
+}
+
+@keyframes slideInLeft {
+    0% {
+      transform: translateX(25%);
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+
+    }
+  }
+
+.containerPag1 {
+    background: linear-gradient(269.98deg, #0a0839 0.03%, #19185d 24.1%, #0F4C81 46.95%, rgba(94, 89, 250, 0.659) 69.66%, rgba(255, 255, 255, 0) 99.99%);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100%;
+    
+    min-height: 728px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+.backgroundPag1{
+    background-image: url('./assets/Background1.jpg');
+    background-position: center;
+    background-size: 100%;
+    background-position-x: -25vw;
+}
+
+.imgeletronics{
+    animation: fadeIn 2s;
+}   
+.eletronics{
+    width: 95%;
+    padding-top: 23%;
+    margin-left: -10%;
+
+}
+
+.badges{
+    animation: fadeIn 2s;
+    margin-top: 3%;
+    justify-content: center;
+    display: flex;
+    gap: 5px;
+}
+
+
+.textpag1{
+    display:flex;
+    align-items: stretch;
+    flex-direction: column;
+    margin-top: 14%;
+    margin-left: 10%;
+    padding-left: 10px;
+    border-left: 3px solid #3633A0;
+    height: fit-content;
+}
+
+.textrubbank{
+    animation: 1s ease-out 0s 1 slideInLeft;
+    width: 15.4296875vw;
+    height: auto;
+    font-family: 'Rubik', sans-serif;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 96px;
+    line-height: 94.5%;
+    letter-spacing: 0.04em;
+    color: #ffffff;
+    mix-blend-mode: normal;
+    text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+
+}
+
+.textwelcome{
+    animation: 1s ease-out 0s 1 slideInLeft;
+    padding-left: 3%;
+    text-align: left;
+    font-family: 'Rubik', sans-serif;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 24px;
+    line-height: 100%;
+    color: #ffffff;
+}
+
+.revealpag1{
+    position: relative;
+    transform: translateX(25%);
+    opacity: 0;
+    transition: 1s all ease;
+  }
+  
+.revealpag1.active{
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+@media(max-width:450px){
+
+}
+
+@media(max-width:1140px) {
+    .backgroundPag1 {
+        background-size: 110%;
+    }
+}
+
+@media(max-width:1050px){
+    .containerPag1 {
+        background: linear-gradient(0deg, #181734 0%, #27265A 24.07%, #42408E 31.94%, rgba(92, 90, 162, 0.658806) 45.66%, rgba(255, 255, 255, 0) 100%);
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 100%;
+        height: auto;
+        display: flex;
+        flex-direction: column;
+      }
+    
+    .backgroundPag1{
+        background-image: url('./assets/Background1.jpg');
+        background-repeat: no-repeat;
+        background-size: 130%;
+        background-position-y: 0vw;
+        background-position-x: center;
+
+    }
+
+    .badges{
+        margin-top: 1%;
+        justify-content: flex-start;
+        display: flex;
+        gap: 5px;
+    }
+
+    .imgeletronics{
+        display: flex;
+        align-self: flex-end;
+        align-items: flex-end;
+    }
+
+    .eletronics{
+        width: 75%;
+        padding-top: 0%;
+        margin-top: 3.5%;
+        margin-left: 0%;
+        margin-bottom: 3.5%;
+    }
+
+    .textpag1{
+        display:flex;
+        align-items: stretch;
+        flex-direction: column;
+        margin-top: 10%;
+        margin-left: 10%;
+        padding-left: 10px;
+    }
+    
+    .textrubbank{
+        width: 15.4296875vw;
+        height: auto;
+        font-family: 'Rubik', sans-serif;
+        font-style: normal;
+        font-weight: 500;
+        font-size: 96px;
+        line-height: 94.5%;
+        letter-spacing: 0.04em;
+        mix-blend-mode: normal;
+        padding-left: 1.5vw;
+        text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    
+    }
+    
+    .textwelcome{
+        padding-left: 1.5vw;
+        text-align: left;
+        font-family: 'Rubik', sans-serif;
+        font-style: normal;
+        font-weight: bold;
+        font-size: 24px;
+        line-height: 100%;
+    }
+}
+
+@media(max-width:580px){
+    .backgroundPag1{
+        background-size: 160%;
+    }
+    .eletronics{
+        width: 80%;
+    }
+}
+
+@media(max-width:460px) {
+    .backgroundPag1{
+        background-size: 190%;
+    }
+    .eletronics{
+        width: 90%;
+        margin-bottom: 12.5%;
+    }
+    .textrubbank{
+        font-size: 75px;
+    }
+    .textwelcome{
+        font-size: 20px;
+    }
+}
+
+@media(max-width:395px) {
+    .backgroundPag1{
+        background-size: 240%;
+        background-position-x: 65%;
+    }
+    .eletronics{
+        width: 100%;
+        margin-bottom: 14.5%;
+    }
+    .textpag1{
+        margin-left: 7%;
+        margin-top: 15%;
+    }
+}
+
+@media(max-width:340px) {
+    .badges{
+        width: 100px;
+    }
+    .textpag1{
+        margin-left: 4%;
+        padding-left: 1%;
+        margin-top: 15%;
+    }
+    .eletronics{
+        width: 100%;
+    }
+
+}
+
+@media(max-width:305px) {
+    .badges{
+        width: 100px;
+    }
+    .textpag1{
+        margin-left: 1%;
+        padding-left: 0%;
+        margin-top: 15%;
+    }
+    .eletronics{
+        width: 100%;
+        margin-left: -5%;
+    }
+
+}
+/*280 450 768 1024 1440*/
+  
