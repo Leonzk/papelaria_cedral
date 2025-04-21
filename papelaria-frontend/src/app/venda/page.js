@@ -9,6 +9,7 @@ import MaskedInput from 'react-text-mask';
 import Footer from "../components/footer/page";
 import {Button,TableBody,TableRow,TableCell, IconButton, TableFooter, TablePagination, Table,TableHead,Paper,Tooltip,Typography,CircularProgress, TextField,} from "@material-ui/core";
 import { Box, Modal, Tab, Tabs } from "@mui/material";
+import { ToastContainer, toast } from 'react-toastify';
 import { AddShoppingCart } from "@mui/icons-material";
 import PropTypes from 'prop-types';
 import Divider from '@mui/material/Divider';
@@ -46,6 +47,7 @@ CustomTabPanel.propTypes = {
 
 export default function Postagens(props){
 
+    const [loading, setLoading] = useState(true);
     const [errorItem, seterrorItem] = useState(false)
     const [stateModal, setstateModal] = useState(false);
     const [stateItem, setStateItem] = useState()
@@ -55,6 +57,7 @@ export default function Postagens(props){
     const [stateTotal, setStateTotal] = useState(0);
     const [filtro, setFiltro] = useState("");
     useEffect(() => {
+        setLoading(true);
         fetch("http://localhost:5218/api/venda")
         .then(r => r.json())
         .then(r =>{
@@ -62,7 +65,10 @@ export default function Postagens(props){
             setStateTotal(r.length);
             
             console.log(r);
-        });
+
+            setLoading(false);
+        })
+        .catch(() => setLoading(false));
     }, []);
 
     const cnpjmask = [/[1-9]/,/[1-9]/," ", /[1-9]/,/[1-9]/,/[1-9]/," ", /[1-9]/,/[1-9]/,/[1-9]/,"/","0","0","0","1","-",/[1-9]/,/[1-9]/];
@@ -170,12 +176,58 @@ export default function Postagens(props){
 
                     fetch(`http://localhost:5218/api/itemvenda/`, requestOptions3)
                 }
-            
-            console.log(r);
-        });
+
+                console.log(r)
+                if(r.status == 400 || r.status == 422){
+                    toast.error('Venda Não Realizada', {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: false,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "light",
+                        });
+                }
+                else{
+                    toast.success('Venda Realizada Com Sucesso', {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: false,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "light",
+                    });
+
+                    setStateItens([]);
+                    fetch("http://localhost:5218/api/venda")
+                    .then(r => r.json())
+                    .then(r =>{
+                        setStateVendas(r);
+                        setStateTotal(r.length);
+                        
+                        console.log(r);
+                    });
+                }
+            }).catch((e) => {
+                console.log(e);
+                toast.error('Venda Não Realizada', {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                    });
+            });
         
 
-        alert("Venda Realizada Com Sucesso")
+        
     }
     const [value, setValue] = useState(0);
 
@@ -200,16 +252,16 @@ export default function Postagens(props){
                         {stateView.map((item, index) => (
 
                             <div className="d_flex flex-column">
+                                <Divider></Divider>
                                 <List className="d_flex flex-row mx-auto align-item-center">
-                                    <ListItem alignItems="center">Nome = {item.item.nome}</ListItem>
+                                    <ListItem alignItems="center">Nome Item = {item.item.nome}</ListItem>
 
-                                    <ListItem alignItems="center">Quantidade = {item.quant}</ListItem>
+                                    <ListItem alignItems="center">Quantidade Item = {item.quant}</ListItem>
                                 </List>
-                                
                                 <List>
-                                    <ListItem>Valor Un. = {item.item.valor}</ListItem>
+                                    <ListItem>Valor Unitário = {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.item.valor)}</ListItem>
 
-                                    <ListItem>Valor Total = {(item.item.valor * item.quant)}</ListItem>
+                                    <ListItem>Valor Total = {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.item.valor * item.quant)}</ListItem>
                                 </List>
                                 <Divider>Item {index+1}</Divider>
                             </div>
@@ -218,9 +270,13 @@ export default function Postagens(props){
                         </div>
                     </Box>
                 </Modal>
-
+                {loading ? (
+                        <div className="d-flex justify-content-center align-items-center" style={{ height: '50vh' }}>
+                            <CircularProgress />
+                        </div>
+                    ) : (
             <div className="flexcontainer w-100">
-                
+                <ToastContainer />
                 <Box sx={{width: "100%", borderBottom: 1, borderColor: 'divider' }}>
                     <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
                     <Tab className="px-3" label="Realizar Venda" {...a11yProps(0)} />
@@ -260,7 +316,7 @@ export default function Postagens(props){
                                     <TableCell><center>{item.id}</center></TableCell>
                                     <TableCell><center>{item.estoque_produto.nome}</center></TableCell>
                                     <TableCell><center>{item.estoque_produto.cod_barra}</center></TableCell>
-                                    <TableCell><center>{item.estoque_produto.valor}</center></TableCell>
+                                    <TableCell><center>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.estoque_produto.valor)}</center></TableCell>
                                     <TableCell><center>{item.quant}</center></TableCell>
                                     <TableCell className="d-flex flex-row flex-row-reverse">
                                     <center><Button 
@@ -276,8 +332,12 @@ export default function Postagens(props){
                         </TableBody>
                         <TableFooter>
                             <TableRow>
-                                <TableCell>Total de Itens: {stateItens.length}</TableCell>
-                                <TablePagination rowsPerPage={20} page={0} count={stateItens.length}  />
+                                <TableCell colSpan={6} align="right">
+                                    Preço Total: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
+                                        stateItens.reduce((total, item) => total + item.estoque_produto.valor * item.quant, 0)
+                                    )}
+                                </TableCell>
+                                {/* <TablePagination rowsPerPage={20} page={0} count={stateItens.length}  /> */}
                             </TableRow>
                         </TableFooter>
                     </Table>
@@ -307,7 +367,11 @@ export default function Postagens(props){
                                 <TableRow key={index}>
                                     <TableCell><center>{item.id}</center></TableCell>
                                     <TableCell><center>{(item.data).substring(11,19)+" | "+(item.data).substring(0,10).split('-')[2] +"/"+(item.data).substring(0,10).split('-')[1] +"/"+(item.data).substring(0,10).split('-')[0]}</center></TableCell>
-                                    <TableCell><center>{item.valor}</center></TableCell>
+                                    <TableCell>
+                                        <center>
+                                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.valor)}
+                                        </center>
+                                    </TableCell>
                                     <TableCell className="d-flex flex-row flex-row-reverse">
                                     <center>
                                         <Button 
@@ -331,6 +395,7 @@ export default function Postagens(props){
                     </Table>
                 </CustomTabPanel>
             </div>
+            )}
         </div>
       </div>
       <Footer/>

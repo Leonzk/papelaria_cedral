@@ -15,7 +15,7 @@ export default function Home() {
         <div className='containerPag1'>
             <div className='textpag1'>            
                 <p className='textwelcome'>PDV</p>
-                <p className='textrubbank'>Papelaria<br />Cedral</p>
+                <p className='texthome'>Papelaria<br />Cedral</p>
                 <div className='badges'>
               </div>
             </div>

@@ -273,7 +273,7 @@ export default function Postagens(props){
                                 <TableCell><center>{item.id}</center></TableCell>
                                 <TableCell><center>{item.nome}</center></TableCell>
                                 <TableCell><center>{item.cod_barra}</center></TableCell>
-                                <TableCell><center>{item.valor}</center></TableCell>
+                                <TableCell><center>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.valor)}</center></TableCell>
                                 <TableCell className="d-flex flex-row flex-row-reverse">
                                     <Button 
                                         variant="outlined"

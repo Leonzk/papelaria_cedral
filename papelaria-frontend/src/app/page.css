@@ -21,7 +21,7 @@
     background-position: center;
     background-size: 100%;
     
-    min-height: 728px;
+    min-height: 100vh;
     display: flex;
     justify-content: space-between;
   }
@@ -63,7 +63,7 @@
     height: fit-content;
 }
 
-.textrubbank{
+.texthome{
     animation: 1s ease-out 0s 1 slideInLeft;
     width: 15.4296875vw;
     height: auto;
