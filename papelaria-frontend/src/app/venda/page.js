@@ -78,22 +78,38 @@ export default function Postagens(props){
             await fetch(`http://localhost:5218/api/estoque/codbarra/${filtro}`)
             .then(r => r.json())
             .then(r =>{
-                
                 console.log(r);
-                var tamanho = stateItens.length
-                
-                var log = stateItens.find((item) => item.estoque_produto.id === r.estoque_produto.id)
-                if(!log){
-                    setStateItens(stateItens => [...stateItens, {...r, quant: 1}]);
+                console.log(r.status)
+                if(r.status == 400 || r.status == 404){
+                    console.log(stateItens);
+                    toast.error('Produto Não Encontrado', {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: false,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "light",
+                        });
                 }
                 else{
-                    const itemAtualizado = stateItens.find((item) => item.estoque_produto.id === r.estoque_produto.id);
-                    const itensFiltrados = stateItens.filter((item) => item.estoque_produto.id !== r.estoque_produto.id);
-
-                    if (itemAtualizado) {
-                        // Atualiza o valor do item e reinserimos na lista
-                        setStateItens([...itensFiltrados, { ...itemAtualizado, quant: itemAtualizado.quant+1 }]);
-                      }
+                    var tamanho = stateItens.length
+                
+                    var log = stateItens.find((item) => item.estoque_produto.id === r.estoque_produto.id)
+                    if(!log){
+                        setStateItens(stateItens => [...stateItens, {...r, quant: 1}]);
+                    }
+                    else{
+                        const itemAtualizado = stateItens.find((item) => item.estoque_produto.id === r.estoque_produto.id);
+                        const itensFiltrados = stateItens.filter((item) => item.estoque_produto.id !== r.estoque_produto.id);
+    
+                        if (itemAtualizado) {
+                            // Atualiza o valor do item e reinserimos na lista
+                            setStateItens([...itensFiltrados, { ...itemAtualizado, quant: itemAtualizado.quant+1 }]);
+                          }
+                    }
+                    
                 }
                    
             });
@@ -292,7 +308,7 @@ export default function Postagens(props){
                         </div>
                         <div className="mt-3">
                             <center>
-                                <Button onClick={handleFiltro} className="btn mx-2" id="botao" variant="contained" color="primary">Adicionar - <AddShoppingCart/></Button>
+                                <Button onClick={handleFiltro} className="btn mx-2" id="botao" variant="contained" color="primary">Adicionar  <AddShoppingCart/></Button>
                             </center>
                         </div>
                     </div>

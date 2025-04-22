@@ -86,8 +86,7 @@ namespace papelaria_backend.Services
 
             MySqlCommand cmd = conexao.CreateCommand();
 
-            cmd.CommandText = $@"delete from estoque where item_id = @id;
-                                    delete from item where item_id = @id;
+            cmd.CommandText = $@"delete from estoque where produtoItem_id = @id;
             ";
 
             cmd.Parameters.AddWithValue("@id", id);

@@ -8,10 +8,13 @@ namespace papelaria_backend.ViewModel.Item
     public class ItemController : ControllerBase
     {
         private readonly Services.ItemServices _itemServices;
+        private readonly Services.EstoqueServices _estoqueServices;
 
-        public ItemController(Services.ItemServices itemServices)
+
+        public ItemController(Services.ItemServices itemServices, Services.EstoqueServices estoqueServices)
         {
             _itemServices = itemServices;
+            _estoqueServices = estoqueServices;
         }
 
         //CONTROLLERS DE PRODUTO
@@ -19,13 +22,26 @@ namespace papelaria_backend.ViewModel.Item
         [HttpPost("produto")]
         public IActionResult CriarProduto([FromBody] ProdutoCriarViewModel produtoVM)
         {
-            Entities.Item item = new Entities.Item();
-            item.nome = produtoVM.nome;
-            item.valor = produtoVM.valor;
+            // Verificar se já existe um produto com o mesmo nome ou código de barras
+            var produtoExistente = _itemServices.ObterTodosProdutos()
+                .FirstOrDefault(p => p.nome == produtoVM.nome || p.cod_barra == produtoVM.cod_barra);
+
+            if (produtoExistente != null)
+            {
+                return Conflict();
+            }
+
+            // Criar o item
+            Entities.Item item = new Entities.Item
+            {
+                nome = produtoVM.nome,
+                valor = produtoVM.valor
+            };
 
             var sucesso1 = _itemServices.SalvarItem(item);
 
-            Entities.Item.Produto produto = new Entities.Item.Produto()
+            // Criar o produto
+            Entities.Item.Produto produto = new Entities.Item.Produto
             {
                 id = item.id,
                 nome = item.nome,
@@ -115,19 +131,28 @@ namespace papelaria_backend.ViewModel.Item
         [HttpPost("produto/deletar/{id}")]
         public IActionResult DeletarProduto(int id)
         {
-            bool sucesso = false;
+            bool sucessoEstoque = false;
+            bool sucessoProduto = false;
 
-            sucesso = _itemServices.DeletarProduto(id);
+            // Primeiro, deletar o estoque associado ao produto
+            sucessoEstoque = _estoqueServices.DeletarEstoque(id);
 
-            if (sucesso)
+            if (!sucessoEstoque)
             {
-                return Ok();
+                return UnprocessableEntity(new { mensagem = "Erro ao deletar o estoque do produto." });
+            }
+
+            // Depois, deletar o produto
+            sucessoProduto = _itemServices.DeletarProduto(id);
+
+            if (sucessoProduto)
+            {
+                return Ok(new { mensagem = "Produto deletado com sucesso." });
             }
             else
             {
-                return UnprocessableEntity();
+                return UnprocessableEntity(new { mensagem = "Erro ao deletar o produto." });
             }
-
         }
 
         //CONTROLLERS DE SERVIÇO

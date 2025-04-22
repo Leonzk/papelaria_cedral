@@ -2,7 +2,8 @@
 
 import "./page.css"
 import Link from "next/link";
-import Cabecalho from "../../cabecalho/page";
+import Cabecalho from "../../components/cabecalho/page";
+import Footer from "../../components/footer/page";
 import { useEffect, useState } from "react";
 import ReactModal from 'react-modal';
 import MaskedInput from 'react-text-mask';

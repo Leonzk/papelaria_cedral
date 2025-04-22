@@ -8,7 +8,8 @@ import { useEffect, useState } from "react";
 import ReactModal from 'react-modal';
 import MaskedInput from 'react-text-mask';
 import AppNavbar from "../../components/templates/dashboard/components/AppNavbar";
-
+import { NumericFormat } from "react-number-format";
+import { ToastContainer, toast } from 'react-toastify';
 import {Button,TableBody,TableRow,TableCell, IconButton, TableFooter, TablePagination, Table,TableHead,Paper,Tooltip,Typography,CircularProgress, TextField,} from "@material-ui/core";
 import { Box, Modal } from "@mui/material";
 
@@ -70,7 +71,7 @@ export default function Postagens(props){
 
         console.log(id);
 
-        if(confirm("Deseja realmente excluir esta Produto?")){
+        if(confirm("Deseja realmente excluir este Produto?")){
             const requestOptions = {
                 method: 'POST',
                 body: "",
@@ -82,6 +83,18 @@ export default function Postagens(props){
 
             const response = await fetch(`http://localhost:5218/api/item/produto/deletar/${id}`, requestOptions);
             console.log(response);
+            toast.success('Produto Excluído com Sucesso', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+            });
+
+            await fetch("http://localhost:5218/api/item/produto")
         }
         else{
 
@@ -167,13 +180,43 @@ export default function Postagens(props){
                     'Accept': 'application/json'
                     }),
                 };
+                
+                if(r.status == 400 || r.status == 422 || r.status == 409){
+                    toast.error('Produto Já Cadastrado', {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: false,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "light",
+                        });
+                }
+                else{
+                    toast.success('Produto Cadastrado com Sucesso', {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: false,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "light",
+                    });
 
-                fetch(`http://localhost:5218/api/estoque/`, requestOptions2)
+                    setStateItem({
+                        nome: "",
+                        cod_barra: "",
+                        valor: 0
+                    });
+
+                    fetch(`http://localhost:5218/api/estoque/`, requestOptions2)
+                }
             });
 
 
         setStateEditar(false)
-        alert("Produto Criado Com Sucesso")
     }
 
   return (
@@ -184,69 +227,124 @@ export default function Postagens(props){
         <br></br>
         <div className="container w-100">
             <div className="flexcontainer w-100">
+                <ToastContainer />
                 <Modal open={stateEditar} onClose={() => handleEditarClose()}>
-                    <Box className="rounded bg-white w-50 mt-5 shadow d-flex flex-column p-3 justify-content-center mx-auto">
-                    <div className="mb-3">
-                        <center>
+                    <Box className="modal-container">
+                        <div className="modal-header">
                             <h2>Atualizar Produto</h2>
-                        </center>
-                    </div>
-                    <div className="form-body">
-                        <label htmlFor="nome" className="form-label">Nome</label>
-                        <div className="input-group mb-3">
-                            <TextField value={stateItem.nome} onChange={(e)=> setStateItem((stateItem) => ({...stateItem, nome: e.target.value}))} type="text" className="form-control" id="nome"/>
                         </div>
+                        <div className="modal-body">
+                            <label htmlFor="nome" className="form-label">Nome</label>
+                            <div className="input-group">
+                                <TextField 
+                                    value={stateItem.nome} 
+                                    onChange={(e) => setStateItem((stateItem) => ({ ...stateItem, nome: e.target.value }))} 
+                                    type="text" 
+                                    className="form-control" 
+                                    id="nome" 
+                                />
+                            </div>
 
-                        <label htmlFor="cod_barra" className="form-label">Código de Barras</label>
-                        <div className="input-group mb-3">
-                            <TextField value={stateItem.cod_barra} onChange={(e)=> setStateItem((stateItem) => ({...stateItem, cod_barra: e.target.value}))} type="text" className="form-control" id="cod_barra"/>
-                        </div>
+                            <label htmlFor="cod_barra" className="form-label">Código de Barras</label>
+                            <div className="input-group">
+                                <TextField 
+                                    value={stateItem.cod_barra} 
+                                    onChange={(e) => setStateItem((stateItem) => ({ ...stateItem, cod_barra: e.target.value }))} 
+                                    type="text" 
+                                    className="form-control" 
+                                    id="cod_barra" 
+                                />
+                            </div>
 
-                        <label htmlFor="valor" className="form-label">Valor</label>
-                        <div className="input-group mb-3">
-                            <TextField value={stateItem.valor} onChange={(e)=> setStateItem((stateItem) => ({...stateItem, valor: e.target.value}))} type="text" className="form-control" id="valor"/>
+                            <label htmlFor="valor" className="form-label">Valor</label>
+                            <div className="input-group">
+                                <NumericFormat
+                                    value={stateItem.valor}
+                                    onValueChange={(values) => {
+                                        const { value } = values; // Valor numérico sem formatação
+                                        setStateItem((stateItem) => ({ ...stateItem, valor: value }));
+                                    }}
+                                    thousandSeparator="."
+                                    decimalSeparator=","
+                                    prefix="R$ "
+                                    className="form-control"
+                                    id="valor"
+                                    allowNegative={false}
+                                />
+                            </div>
                         </div>
-                    </div>
-                    <div className="form-footer align-item-center mt-3 mb-3">
-                        <center>
-                        <Button onClick={() => handleEditarSalvar(stateItemId)} variant="contained" color="success" className="btn btn-primary">Alterar</Button>
-                        </center>
-                    </div>
-                    {errorItem ?<div className="mt-3 text-danger">Formulário incorreto</div> : <></>}
+                        <div className="modal-footer">
+                            <Button 
+                                onClick={() => handleEditarSalvar(stateItemId)} 
+                                variant="contained" 
+                                color="success" 
+                                className="btn btn-primary"
+                            >
+                                Alterar
+                            </Button>
+                        </div>
+                        {errorItem ? <div className="text-danger">Formulário incorreto</div> : null}
                     </Box>
                 </Modal>
                 
                 
                 
                 <Modal className="mx-auto" open={stateNovo} onClose={() => handleNovoClose()}>
-                    <Box className="rounded bg-white w-50 mt-5 shadow d-flex flex-column p-3 justify-content-center mx-auto">
-                        <div className=" mb-3">
-                            <center>
-                                <h2>Novo Produto</h2>
-                            </center>
+                    <Box className="modal-container">
+                        <div className="modal-header">
+                            <h2>Novo Produto</h2>
                         </div>
-                        <div className="form-body">
+                        <div className="modal-body">
                             <label htmlFor="nome" className="form-label">Nome</label>
-                            <div className="input-group mb-3">
-                                <TextField value={stateItem.nome} onChange={(e)=> setStateItem((stateItem) => ({...stateItem, nome: e.target.value}))} type="text" className="form-control" id="nome"/>
+                            <div className="input-group">
+                                <TextField 
+                                    value={stateItem.nome} 
+                                    onChange={(e) => setStateItem((stateItem) => ({ ...stateItem, nome: e.target.value }))} 
+                                    type="text" 
+                                    className="form-control" 
+                                    id="nome" 
+                                />
                             </div>
 
                             <label htmlFor="cod_barra" className="form-label">Código de Barras</label>
-                            <div className="input-group mb-3">
-                                <TextField value={stateItem.cod_barra} onChange={(e)=> setStateItem((stateItem) => ({...stateItem, cod_barra: e.target.value}))} type="text" className="form-control" id="cod_barra"/>
+                            <div className="input-group">
+                                <TextField 
+                                    value={stateItem.cod_barra} 
+                                    onChange={(e) => setStateItem((stateItem) => ({ ...stateItem, cod_barra: e.target.value }))} 
+                                    type="text" 
+                                    className="form-control" 
+                                    id="cod_barra" 
+                                />
                             </div>
 
                             <label htmlFor="valor" className="form-label">Valor</label>
-                            <div className="input-group mb-3">
-                                <TextField value={stateItem.valor} onChange={(e)=> setStateItem((stateItem) => ({...stateItem, valor: e.target.value}))} type="numeric" className="form-control" id="valor"/>
+                            <div className="input-group">
+                                <NumericFormat
+                                    value={stateItem.valor}
+                                    onValueChange={(values) => {
+                                        const { value } = values; // Valor numérico sem formatação
+                                        setStateItem((stateItem) => ({ ...stateItem, valor: value }));
+                                    }}
+                                    thousandSeparator="."
+                                    decimalSeparator=","
+                                    prefix="R$ "
+                                    className="form-control"
+                                    id="valor"
+                                    allowNegative={false}
+                                />
                             </div>
                         </div>
-                        <div className="form-footer align-item-center mt-3 mb-3">
-                            <center>
-                            <Button onClick={() => handleNovoSalvar()} variant="contained" color="success" className="btn btn-primary">Criar</Button>
-                            </center>
+                        <div className="modal-footer">
+                            <Button 
+                                onClick={() => handleNovoSalvar()} 
+                                variant="contained" 
+                                color="success" 
+                                className="btn btn-primary"
+                            >
+                                Criar
+                            </Button>
                         </div>
-                        {errorItem ?<div className="mt-3 text-danger">Formulário incorreto</div> : <></>}
+                        {errorItem ? <div className="text-danger">Formulário incorreto</div> : null}
                     </Box>
                 </Modal>
                 <div className="input-group mb-3 w-100">
