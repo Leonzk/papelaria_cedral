@@ -15,6 +15,7 @@ import { Box, Modal } from "@mui/material";
 
 export default function Postagens(props){
 
+    const [loading, setLoading] = useState(true);
     const [errorItem, seterrorItem] = useState(false)
     const [stateEditar, setStateEditar] = useState(false);
     const [stateNovo, setStateNovo] = useState(false)
@@ -31,12 +32,14 @@ export default function Postagens(props){
     const [isClient, setIsClient] = useState(false);
     useEffect(() => {
         setIsClient(true)
+        setLoading(true);
         fetch("http://localhost:5218/api/item/produto")
         .then(r => r.json())
         .then(r =>{
             setStateItens(r);
             setStateTotal(r.length);
             console.log(r);
+            setLoading(false);
         });
     }, []);
 
@@ -226,6 +229,11 @@ export default function Postagens(props){
       <div className="principal">
         <br></br>
         <div className="container w-100">
+        {loading ? (
+                        <div className="d-flex justify-content-center align-items-center" style={{ height: '50vh' }}>
+                            <CircularProgress />
+                        </div>
+                    ) : (
             <div className="flexcontainer w-100">
                 <ToastContainer />
                 <Modal open={stateEditar} onClose={() => handleEditarClose()}>
@@ -398,7 +406,7 @@ export default function Postagens(props){
                 </Table>
                 {stateItens.length==0 ?<h2>Sem Resultados</h2> : <></>}
             </div>
-            
+            )}
         </div>
       </div>
       <Footer/>

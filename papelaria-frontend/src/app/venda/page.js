@@ -48,6 +48,7 @@ CustomTabPanel.propTypes = {
 export default function Postagens(props){
 
     const [loading, setLoading] = useState(true);
+    const [sugestoes, setSugestoes] = useState([]);
     const [errorItem, seterrorItem] = useState(false)
     const [stateModal, setstateModal] = useState(false);
     const [stateItem, setStateItem] = useState()
@@ -74,6 +75,7 @@ export default function Postagens(props){
     const cnpjmask = [/[1-9]/,/[1-9]/," ", /[1-9]/,/[1-9]/,/[1-9]/," ", /[1-9]/,/[1-9]/,/[1-9]/,"/","0","0","0","1","-",/[1-9]/,/[1-9]/];
 
     async function handleFiltro(){
+        console.log(filtro);
         if(filtro!=""){
             await fetch(`http://localhost:5218/api/estoque/codbarra/${filtro}`)
             .then(r => r.json())
@@ -126,9 +128,30 @@ export default function Postagens(props){
         setStateItens(stateItens => stateItens.filter(item => item.id !== e));
       };
 
-    const handleFiltrar = (event) => {
+    const handleFiltrar = async (event) => {
         const valor = event.target.value;
         setFiltro(valor);
+    
+        if (valor.length > 3) {
+            try {
+                await fetch("http://localhost:5218/api/item/produto")
+                .then(r => r.json())
+                .then(r =>{
+                    var newArray = r.filter(function (item){
+                        return item.nome.includes(valor) ||
+                                item.cod_barra.includes(valor) ||
+                                item.id == valor
+                    });
+                    console.log(newArray);
+                    setSugestoes(newArray);
+                    console.log(r);
+                });
+            } catch (error) {
+                console.error("Erro ao buscar sugestões:", error);
+            }
+        } else {
+            setSugestoes([]); // Limpa as sugestões se o valor for menor que 3 caracteres
+        }
     };
 
     async function handleModalOpen(id){
@@ -304,13 +327,65 @@ export default function Postagens(props){
                 <div className="d-flex flex-row">
                     <div className="divpesquisa d-flex flex-column" style={{height: "3vh" }}>
                         <div>
-                            <TextField onChange={handleFiltrar} value={filtro} type="text" id="standard-basic" label="Código de Barras" variant="standard" className="form-control"/>
+                            <TextField onPaste={handleFiltro} onChange={handleFiltrar} value={filtro} type="text" id="standard-basic" label="Nome (ou) Código de Barras" variant="standard" className="form-control"/>
                         </div>
                         <div className="mt-3">
                             <center>
                                 <Button onClick={handleFiltro} className="btn mx-2" id="botao" variant="contained" color="primary">Adicionar  <AddShoppingCart/></Button>
                             </center>
                         </div>
+
+                        {sugestoes.length > 0 && (
+                            <Table className="tableresultado shadow p-3 mb-3 bg-white rounded">
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell><center>ID</center></TableCell>
+                                        <TableCell><center>Nome</center></TableCell>
+                                        <TableCell><center>Cod. Barras</center></TableCell>
+                                        <TableCell><center>Valor</center></TableCell>
+                                        <TableCell><center>Ação</center></TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {sugestoes.map((produto, index) => (
+                                        <TableRow key={index}>
+                                            <TableCell><center>{produto.id}</center></TableCell>
+                                            <TableCell><center>{produto.nome}</center></TableCell>
+                                            <TableCell><center>{produto.cod_barra}</center></TableCell>
+                                            <TableCell>
+                                                <center>
+                                                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(produto.valor)}
+                                                </center>
+                                            </TableCell>
+                                            <TableCell>
+                                                <center>
+                                                    <Button
+                                                        variant="contained"
+                                                        color="primary"
+                                                        onClick={() => {
+                                                            const existingItem = stateItens.find(item => item.estoque_produto.id === produto.id);
+                                                            if (existingItem) {
+                                                                // Atualiza a quantidade do item existente
+                                                                setStateItens(stateItens.map(item =>
+                                                                    item.estoque_produto.id === produto.id
+                                                                        ? { ...item, quant: item.quant + 1 }
+                                                                        : item
+                                                                ));
+                                                            } else {
+                                                                // Adiciona o novo item
+                                                                setStateItens([...stateItens, { estoque_produto: produto, quant: 1 }]);
+                                                            }
+                                                        }}
+                                                    >
+                                                        Adicionar
+                                                    </Button>
+                                                </center>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        )}
                     </div>
 
                     
@@ -333,7 +408,43 @@ export default function Postagens(props){
                                     <TableCell><center>{item.estoque_produto.nome}</center></TableCell>
                                     <TableCell><center>{item.estoque_produto.cod_barra}</center></TableCell>
                                     <TableCell><center>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.estoque_produto.valor)}</center></TableCell>
-                                    <TableCell><center>{item.quant}</center></TableCell>
+                                    <TableCell>
+                                        <center className="d-flex align-items-center justify-content-center">
+                                            <Button
+                                                variant="outlined"
+                                                color="secondary"
+                                                size="small"
+                                                style={{ minWidth: '30px', padding: '2px 5px' }}
+                                                onClick={() => {
+                                                    if (item.quant > 1) {
+                                                        setStateItens(stateItens.map((currentItem) =>
+                                                            currentItem.estoque_produto.id === item.estoque_produto.id
+                                                                ? { ...currentItem, quant: currentItem.quant - 1 }
+                                                                : currentItem
+                                                        ));
+                                                    }
+                                                }}
+                                            >
+                                                -
+                                            </Button>
+                                            <span style={{ margin: "0 10px" }}>{item.quant}</span>
+                                            <Button
+                                                variant="outlined"
+                                                color="primary"
+                                                size="small"
+                                                style={{ minWidth: '30px', padding: '2px 5px' }}
+                                                onClick={() => {
+                                                    setStateItens(stateItens.map((currentItem) =>
+                                                        currentItem.estoque_produto.id === item.estoque_produto.id
+                                                            ? { ...currentItem, quant: currentItem.quant + 1 }
+                                                            : currentItem
+                                                    ));
+                                                }}
+                                            >
+                                                +
+                                            </Button>
+                                        </center>
+                                    </TableCell>
                                     <TableCell className="d-flex flex-row flex-row-reverse">
                                     <center><Button 
                                             variant="outlined"
