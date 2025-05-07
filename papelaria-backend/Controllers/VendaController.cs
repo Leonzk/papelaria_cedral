@@ -97,5 +97,47 @@ namespace papelaria_backend.Controllers
                 return NotFound();
             }
         }
+
+        [HttpGet("periodo/{dataInicio}/{dataFim}")]
+        public IActionResult ObterVendasPeriodo(DateTime dataInicio, DateTime dataFim)
+        {
+            var venda = _vendaServices.ObterVendasPeriodo(dataInicio, dataFim);
+
+            bool sucesso = false;
+
+            if (venda != null)
+            {
+                sucesso = true;
+
+                if (sucesso)
+                {
+                    return Ok(venda);
+                }
+                else
+                {
+                    return UnprocessableEntity();
+                }
+            }
+            else
+            {
+                return NotFound();
+            }
+        
+        }
+
+        [HttpGet("grafico/itens")]
+        public IActionResult ObterRelatorioVendas([FromQuery] DateTime dataInicio, [FromQuery] DateTime dataFim)
+        {
+            var relatorio = _vendaServices.ObterRelatorioVendas(dataInicio, dataFim);
+
+            if (relatorio != null && relatorio.Any())
+            {
+                return Ok(relatorio);
+            }
+            else
+            {
+                return NotFound("Nenhum dado encontrado para o período especificado.");
+            }
+        }
     }
 }

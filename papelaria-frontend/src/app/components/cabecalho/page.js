@@ -72,6 +72,18 @@ export default function Cabecalho() {
               </div>
               </ListItemButton>
             </ListItem>
+            <ListItem>
+              <div>|</div>
+            </ListItem>
+            <ListItem className={`nav-item ${activeButton === 'caixa' ? 'active' : ''}`}>
+              <ListItemButton onClick={() => handleButtonClick('caixa')} className="nav-link" href="/caixa">
+              <div className="d-flex flex-row">
+                <PointOfSaleIcon/> 
+                <div>Caixa<span>
+                  </span></div>
+              </div>
+              </ListItemButton>
+            </ListItem>
           </List>
       </div>
       

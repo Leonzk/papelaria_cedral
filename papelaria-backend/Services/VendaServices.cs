@@ -1,5 +1,6 @@
 ﻿using MySql.Data.MySqlClient;
 using papelaria_backend.Entities;
+using papelaria_backend.ViewModel.Venda;
 
 namespace papelaria_backend.Services
 {
@@ -181,6 +182,92 @@ namespace papelaria_backend.Services
             conn.Close();
 
             return venda;
+        }
+
+        public IEnumerable<Entities.Venda> ObterVendasPeriodo(DateTime dataInicial, DateTime dataFinal)
+        {
+            var conn = _bd.CriarConexao();
+
+            MySqlCommand cmd = conn.CreateCommand();
+
+            cmd.CommandText = $@"SELECT venda_id, venda_Valor, venda_Data
+                                FROM Venda
+                                WHERE venda_Data BETWEEN @dataInicial AND @dataFinal";
+
+            cmd.Parameters.AddWithValue("@dataInicial", dataInicial);
+            cmd.Parameters.AddWithValue("@dataFinal", dataFinal);
+
+            if (conn.State != System.Data.ConnectionState.Open)
+            {
+                conn.Open();
+            }
+
+            MySqlDataReader dr = cmd.ExecuteReader();
+            List<Venda> vendas = new List<Venda>();
+            while (dr.Read())
+            {
+                vendas.Add(new Venda()
+                {
+                    id = Convert.ToInt32(dr["venda_id"]),
+                    data = Convert.ToDateTime(dr["venda_Data"]),
+                    valor = (float)dr["venda_Valor"]
+                });
+            }
+            conn.Close();
+
+            return vendas;
+        }
+
+        public IEnumerable<VendaRelatorioItemViewModel> ObterRelatorioVendas(DateTime dataInicio, DateTime dataFim)
+        {
+            var conn = _bd.CriarConexao();
+            MySqlCommand cmd = conn.CreateCommand();
+
+            cmd.CommandText = $@"
+                SELECT
+                    DATE_FORMAT(v.venda_Data, '%Y-%m') AS mes,
+                    i.item_nome,
+                    SUM(iv.item_venda_quant) AS quantidade_vendida,
+                    SUM(iv.item_venda_quant * i.item_valor) AS valor_vendido
+                FROM
+                    ItemVenda iv
+                JOIN
+                    Venda v ON iv.venda_id = v.venda_id
+                JOIN
+                    Item i ON iv.item_id = i.item_id
+                WHERE
+                    v.venda_Data BETWEEN @dataInicio AND @dataFim
+                GROUP BY
+                    DATE_FORMAT(v.venda_Data, '%Y-%m'),
+                    i.item_id
+                ORDER BY
+                    mes,
+                    i.item_nome";
+
+            cmd.Parameters.AddWithValue("@dataInicio", dataInicio);
+            cmd.Parameters.AddWithValue("@dataFim", dataFim);
+
+            if (conn.State != System.Data.ConnectionState.Open)
+            {
+                conn.Open();
+            }
+
+            MySqlDataReader dr = cmd.ExecuteReader();
+            List<VendaRelatorioItemViewModel> relatorio = new List<VendaRelatorioItemViewModel>();
+
+            while (dr.Read())
+            {
+                relatorio.Add(new VendaRelatorioItemViewModel
+                {
+                    Mes = dr["mes"].ToString(),
+                    ItemNome = dr["item_nome"].ToString(),
+                    QuantidadeVendida = Convert.ToInt32(dr["quantidade_vendida"]),
+                    ValorVendido = Convert.ToSingle(dr["valor_vendido"])
+                });
+            }
+
+            conn.Close();
+            return relatorio;
         }
     }
 }

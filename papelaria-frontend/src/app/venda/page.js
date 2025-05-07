@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import ReactModal from 'react-modal';
 import MaskedInput from 'react-text-mask';
 import Footer from "../components/footer/page";
-import {Button,TableBody,TableRow,TableCell, IconButton, TableFooter, TablePagination, Table,TableHead,Paper,Tooltip,Typography,CircularProgress, TextField,} from "@material-ui/core";
+import {Button,TableBody,TableRow,TableCell, IconButton, TableFooter, TablePagination, Table,TableHead,Paper,Typography,CircularProgress, TextField,} from "@material-ui/core";
 import { Box, Modal, Tab, Tabs } from "@mui/material";
 import { ToastContainer, toast } from 'react-toastify';
 import { AddShoppingCart } from "@mui/icons-material";
@@ -15,6 +15,10 @@ import PropTypes from 'prop-types';
 import Divider from '@mui/material/Divider';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
+import { Bar, Line, Pie } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement, PointElement, LineElement } from 'chart.js';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -57,6 +61,20 @@ export default function Postagens(props){
     const [stateVendas, setStateVendas] = useState([]);
     const [stateTotal, setStateTotal] = useState(0);
     const [filtro, setFiltro] = useState("");
+    
+    const [topItems, setTopItems] = useState([]);
+    const [dataInicio, setDataInicio] = useState("");
+    const [dataFim, setDataFim] = useState("");
+
+    const fetchTopItems = () => {
+        fetch(`http://localhost:5218/api/venda/grafico/itens?dataInicio=${dataInicio}&dataFim=${dataFim}`)
+            .then((r) => r.json())
+            .then((data) => {
+                setTopItems(data);
+            })
+            .catch((err) => console.error("Erro ao buscar dados para gráficos:", err));
+    };
+
     useEffect(() => {
         setLoading(true);
         fetch("http://localhost:5218/api/venda")
@@ -70,10 +88,74 @@ export default function Postagens(props){
             setLoading(false);
         })
         .catch(() => setLoading(false));
+        const hoje = new Date();
+        const inicioPadrao = new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString().split("T")[0];
+        const fimPadrao = hoje.toISOString().split("T")[0];
+        setDataInicio(inicioPadrao);
+        setDataFim(fimPadrao);
+        fetchTopItems();
     }, []);
 
     const cnpjmask = [/[1-9]/,/[1-9]/," ", /[1-9]/,/[1-9]/,/[1-9]/," ", /[1-9]/,/[1-9]/,/[1-9]/,"/","0","0","0","1","-",/[1-9]/,/[1-9]/];
 
+    const topItemsData = {
+        labels: Array.isArray(topItems) ? topItems.map((item) => item.itemNome) : [], // Meses no eixo X
+        datasets: [
+            {
+                label: "Quantidade Vendida",
+                data: Array.isArray(topItems) ? topItems.map((item) => item.quantidadeVendida) : [], // Quantidade no eixo Y
+                backgroundColor: "rgba(75, 192, 192, 0.6)",
+                borderColor: "rgba(75, 192, 192, 1)",
+                borderWidth: 1,
+            },
+        ],
+    };
+    
+    const optionstopItems = {
+        indexAxis: "x", // Configura o gráfico para barras verticais (eixo X = meses, eixo Y = quantidade)
+        responsive: true,
+        plugins: {
+            legend: {
+                position: "top",
+            },
+            title: {
+                display: true,
+                text: "Itens Mais Vendidos por Mês",
+            },
+        },
+        scales: {
+            x: {
+                title: {
+                    display: true,
+                    text: "Mês",
+                },
+            },
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: "Quantidade Vendida",
+                },
+            },
+        },
+    };
+
+    async function handleGetGraficos(){
+        if (dataInicio && dataFim) {
+            fetchTopItems(); // Faz o fetch dos gráficos com as datas selecionadas
+        } else {
+            toast.error("Por favor, selecione as datas de início e fim.", {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+            });
+        }
+    }
     async function handleFiltro(){
         console.log(filtro);
         if(filtro!=""){
@@ -320,6 +402,7 @@ export default function Postagens(props){
                     <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
                     <Tab className="px-3" label="Realizar Venda" {...a11yProps(0)} />
                     <Tab className="px-3" label="Gerenciamento de Vendas" {...a11yProps(1)} />
+                    <Tab className="px-3" label="Graficos de Vendas" {...a11yProps(2)} />
                     </Tabs>
                 </Box>
                 
@@ -520,6 +603,47 @@ export default function Postagens(props){
                             </TableRow>
                         </TableFooter>
                     </Table>
+                </CustomTabPanel>
+
+                <CustomTabPanel value={value} index={2}>
+                    <div>
+                        <div className="d-flex flex-column align-items-center">
+                            <br></br>
+                            <h3>Itens Mais Vendidos</h3>
+                            <br></br>
+                            <div className="d-flex mb-3 align-items-center">
+                                <TextField
+                                    type="date"
+                                    label="Data Inicial"
+                                    value={dataInicio}
+                                    onChange={(e) => setDataInicio(e.target.value)}
+                                    InputLabelProps={{ shrink: true }}
+                                    className="mr-3 styled-date-field"
+                                    variant="outlined"
+                                    size="small"
+                                />
+                                <TextField
+                                    type="date"
+                                    label="Data Final"
+                                    value={dataFim}
+                                    onChange={(e) => setDataFim(e.target.value)}
+                                    InputLabelProps={{ shrink: true }}
+                                    className="mr-3 styled-date-field"
+                                    variant="outlined"
+                                    size="small"
+                                />
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={handleGetGraficos}
+                                    className="styled-filter-button"
+                                >
+                                    Filtrar
+                                </Button>
+                            </div>
+                            <Bar data={topItemsData} options={optionstopItems} />
+                        </div>
+                    </div>
                 </CustomTabPanel>
             </div>
             )}

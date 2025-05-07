@@ -9,9 +9,13 @@ import ReactModal from 'react-modal';
 import MaskedInput from 'react-text-mask';
 import {Button,TableBody,TableRow,TableCell, IconButton, TableFooter, TablePagination, Table,TableHead,Paper,Tooltip,Typography,CircularProgress, TextField,} from "@material-ui/core";
 import { Box, Modal } from "@mui/material";
+import Divider from '@mui/material/Divider';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
 
 export default function Postagens(props){
 
+    const [loading, setLoading] = useState(true);
     const [errorItem, seterrorItem] = useState(false)
     const [stateEditar, setStateEditar] = useState(false);
     const [stateNovo, setStateNovo] = useState(false)
@@ -24,6 +28,7 @@ export default function Postagens(props){
     const [stateTotal, setStateTotal] = useState(0);
     const [filtro, setFiltro] = useState("");
     useEffect(() => {
+        setLoading(true);
         fetch("http://localhost:5218/api/estoque")
         .then(r => r.json())
         .then(r =>{
@@ -31,6 +36,7 @@ export default function Postagens(props){
             setStateTotal(r.length);
             
             console.log(r);
+            setLoading(false);
         });
     }, []);
 
@@ -144,21 +150,51 @@ export default function Postagens(props){
       <div className="principal">
         <br></br>
         <div className="container w-100">
+        {loading ? (
+                    <div className="d-flex justify-content-center align-items-center" style={{ height: '50vh' }}>
+                        <CircularProgress />
+                    </div>
+                    ) : (
             <div className="flexcontainer w-100">
-                <Modal onClose={() => handleEditarClose()} open={stateEditar}>
+                <Modal className="mx-auto" open={stateEditar} onClose={() => handleEditarClose()}>
                     <Box className="rounded bg-white w-50 mt-5 shadow d-flex flex-column p-3 justify-content-center mx-auto">
-                        <h2>Atualizar Estoque</h2>
-                    
+                        <div className="mb-3">
+                            <Divider>Atualizar Estoque</Divider>
+                        </div>
                         <div className="form-body">
-                            <label htmlFor="quant" className="form-label">Quantidade</label>
-                            <div className="input-group mb-3">
-                                <TextField value={stateItem.quant} onChange={(e)=> setStateItem((stateItem) => ({...stateItem, quant: e.target.value}))} type="numver" className="form-control" id="quant"/>
-                            </div>
+                            <List className="d-flex flex-column mx-auto align-items-center">
+                                <ListItem>
+                                    <label htmlFor="quant" className="form-label">Quantidade</label>
+                                </ListItem>
+                                <ListItem>
+                                    <TextField
+                                        value={stateItem.quant}
+                                        onChange={(e) =>
+                                            setStateItem((stateItem) => ({
+                                                ...stateItem,
+                                                quant: e.target.value,
+                                            }))
+                                        }
+                                        type="number"
+                                        className="form-control"
+                                        id="quant"
+                                    />
+                                </ListItem>
+                            </List>
                         </div>
-                        <div className="form-footer">
-                            <button onClick={() => handleEditarSalvar(stateItemId)} type="button" className="btn btn-primary">Alterar</button>
+                        <div className="form-footer mt-3 d-flex justify-content-center">
+                            <Button
+                                onClick={() => handleEditarSalvar(stateItemId)}
+                                type="button"
+                                variant="contained"
+                                color="primary"
+                            >
+                                Alterar
+                            </Button>
                         </div>
-                        {errorItem ?<p className="mt-3 text-danger">Formulário incorreto</p> : <></>}
+                        {errorItem && (
+                            <p className="mt-3 text-danger text-center">Formulário incorreto</p>
+                        )}
                     </Box>
                 </Modal>
 
@@ -209,7 +245,7 @@ export default function Postagens(props){
                 </Table>
                 {stateItens.length==0 ?<h2>Sem Resultados</h2> : <></>}
             </div>
-            
+        )}
         </div>
       </div>
       <Footer/>

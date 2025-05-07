@@ -10,3 +10,17 @@
 .tableresultado{
     width: 70%;
 }
+
+/* Estilo para os campos de data */
+.styled-date-field {
+    min-width: 200px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+
+/* Estilo para o botão de filtro */
+.styled-filter-button {
+    height: 40px;
+    font-weight: bold;
+    text-transform: none;
+}
