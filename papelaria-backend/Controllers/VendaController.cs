@@ -139,5 +139,20 @@ namespace papelaria_backend.Controllers
                 return NotFound("Nenhum dado encontrado para o período especificado.");
             }
         }
+
+        [HttpGet("grafico/vendas")]
+        public IActionResult ObterRelatorioVendasPorData([FromQuery] DateTime dataInicio, [FromQuery] DateTime dataFim)
+        {
+            var relatorio = _vendaServices.ObterRelatorioVendasPorData(dataInicio, dataFim);
+
+            if (relatorio != null && relatorio.Any())
+            {
+                return Ok(relatorio);
+            }
+            else
+            {
+                return NotFound("Nenhum dado encontrado para o período especificado.");
+            }
+        }
     }
 }

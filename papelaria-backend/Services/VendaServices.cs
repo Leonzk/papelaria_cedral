@@ -225,7 +225,7 @@ namespace papelaria_backend.Services
 
             cmd.CommandText = $@"
                 SELECT
-                    DATE_FORMAT(v.venda_Data, '%Y-%m') AS mes,
+                    i.item_id,
                     i.item_nome,
                     SUM(iv.item_venda_quant) AS quantidade_vendida,
                     SUM(iv.item_venda_quant * i.item_valor) AS valor_vendido
@@ -238,10 +238,8 @@ namespace papelaria_backend.Services
                 WHERE
                     v.venda_Data BETWEEN @dataInicio AND @dataFim
                 GROUP BY
-                    DATE_FORMAT(v.venda_Data, '%Y-%m'),
                     i.item_id
                 ORDER BY
-                    mes,
                     i.item_nome";
 
             cmd.Parameters.AddWithValue("@dataInicio", dataInicio);
@@ -259,10 +257,52 @@ namespace papelaria_backend.Services
             {
                 relatorio.Add(new VendaRelatorioItemViewModel
                 {
-                    Mes = dr["mes"].ToString(),
+                    ItemId = Convert.ToInt32(dr["item_id"].ToString()),
                     ItemNome = dr["item_nome"].ToString(),
                     QuantidadeVendida = Convert.ToInt32(dr["quantidade_vendida"]),
                     ValorVendido = Convert.ToSingle(dr["valor_vendido"])
+                });
+            }
+
+            conn.Close();
+            return relatorio;
+        }
+
+        public IEnumerable<VendaRelatorioDataViewModel> ObterRelatorioVendasPorData(DateTime dataInicio, DateTime dataFim)
+        {
+            var conn = _bd.CriarConexao();
+            MySqlCommand cmd = conn.CreateCommand();
+
+            cmd.CommandText = $@"
+                SELECT
+                    DATE(v.venda_Data) AS data_venda,
+                    SUM(v.venda_Valor) AS valor_total
+                FROM
+                    Venda v
+                WHERE
+                    v.venda_Data BETWEEN @dataInicio AND @dataFim
+                GROUP BY
+                    DATE(v.venda_Data)
+                ORDER BY
+                    DATE(v.venda_Data)";
+
+            cmd.Parameters.AddWithValue("@dataInicio", dataInicio);
+            cmd.Parameters.AddWithValue("@dataFim", dataFim);
+
+            if (conn.State != System.Data.ConnectionState.Open)
+            {
+                conn.Open();
+            }
+
+            MySqlDataReader dr = cmd.ExecuteReader();
+            List<VendaRelatorioDataViewModel> relatorio = new List<VendaRelatorioDataViewModel>();
+
+            while (dr.Read())
+            {
+                relatorio.Add(new VendaRelatorioDataViewModel
+                {
+                    DataVenda = Convert.ToDateTime(dr["data_venda"]),
+                    ValorTotal = Convert.ToSingle(dr["valor_total"])
                 });
             }
 

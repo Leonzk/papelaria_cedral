@@ -8,7 +8,7 @@
 
         public class Servico : Item
         {
-            public bool disponivel { get; set; }
+            public int disponivel { get; set; }
         }
 
         public class Produto : Item

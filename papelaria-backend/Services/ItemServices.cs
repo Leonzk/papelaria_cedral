@@ -183,7 +183,7 @@ namespace papelaria_backend.Services
                     id = Convert.ToInt32(dr["item_id"]),
                     nome = dr["item_nome"].ToString(),
                     valor = (float)dr["item_valor"],
-                    disponivel = (bool)dr["item_disponivel"]
+                    disponivel = (int)dr["item_disponivel"]
                 });
             }
             conn.Close();
@@ -290,7 +290,7 @@ namespace papelaria_backend.Services
                     id = Convert.ToInt32(dr["item_id"]),
                     nome = dr["item_nome"].ToString(),
                     valor = (float)dr["item_valor"],
-                    disponivel = (bool)dr["item_disponivel"]
+                    disponivel = Convert.ToBoolean(dr["item_disponivel"]) ? 1 : 0 // Converte bool para int (1 ou 0)
                 };
             }
             conn.Close();

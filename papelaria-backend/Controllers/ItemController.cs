@@ -171,7 +171,7 @@ namespace papelaria_backend.ViewModel.Item
                 id = item.id,
                 nome = item.nome,
                 valor = item.valor,
-                disponivel = (bool)servicoVM.disponivel
+                disponivel = (int)servicoVM.disponivel
             };
 
             var sucesso2 = _itemServices.SalvarServico(servico);

@@ -5,7 +5,7 @@
         public int id { get; set; }
         public string nome { get; set; }
         public float valor { get; set; }
-        public bool disponivel { get; set; }
+        public int disponivel { get; set; }
 
         public ServicoAtualizarViewModel() { }
     }
