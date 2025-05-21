@@ -361,6 +361,7 @@ export default function Postagens(props){
     
         if (valor.length > 3) {
             try {
+                /*
                 await fetch("http://localhost:5218/api/item/produto")
                 .then(r => r.json())
                 .then(r =>{
@@ -373,8 +374,16 @@ export default function Postagens(props){
                     setSugestoes(newArray);
                     console.log(r);
                 });
+                */
+                await fetch(`http://localhost:5218/api/item/buscar?nome=${valor}`)
+                .then(r => r.json())
+                .then(r =>{
+                    if(r.status != 404){
+                        setSugestoes(r);
+                    }
+                });
             } catch (error) {
-                console.error("Erro ao buscar sugestões:", error);
+                //console.error("Erro ao buscar sugestões:", error);
             }
         } else {
             setSugestoes([]); // Limpa as sugestões se o valor for menor que 3 caracteres
@@ -399,6 +408,44 @@ export default function Postagens(props){
         
         const valores = stateItens.map((item) => item);
         console.log(valores)
+
+        
+        
+        for (let i = 0; i < valores.length; i++) {
+            const idEstoque = valores[i].estoque_produto.id;
+
+            //Verifica se o item é um serviço
+            const servicoresp = await fetch(`http://localhost:5218/api/item/servico/${idEstoque}`)
+            const servicoData = await servicoresp.json();
+            console.log(servicoresp)
+            console.log(servicoData)
+            if(servicoData.id == 0 && servicoData.nome == null){
+                //significa que não é um serviço, verifica o estoque?
+                console.log(valores[i])
+                const response = await fetch(`http://localhost:5218/api/estoque/${idEstoque}`);
+                const estoqueData = await response.json();
+
+                const quantidadeDisponivel = estoqueData.quantidade ?? estoqueData.quant;
+
+                if (valores[i].quant > quantidadeDisponivel) {
+                    toast.error(
+                        `Quantidade insuficiente para o item "${valores[i].estoque_produto.nome}". Disponível: ${quantidadeDisponivel}, Solicitado: ${valores[i].quant}`,
+                        {
+                            position: "top-right",
+                            autoClose: 5000,
+                            hideProgressBar: false,
+                            closeOnClick: false,
+                            pauseOnHover: true,
+                            draggable: true,
+                            progress: undefined,
+                            theme: "light",
+                        }
+                    );
+                    return; // Interrompe a venda se algum item não tiver estoque suficiente
+                }
+            }
+        }
+
         var valorfinal = 0;
         for(var i=0; i<valores.length; i++){
             const requestOptions = {

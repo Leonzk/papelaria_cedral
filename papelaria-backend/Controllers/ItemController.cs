@@ -17,6 +17,28 @@ namespace papelaria_backend.ViewModel.Item
             _estoqueServices = estoqueServices;
         }
 
+        [HttpGet("buscar")]
+        public IActionResult BuscarItensPorNome([FromQuery] string nome)
+        {
+            var itens = _itemServices.BuscarItensPorNome(nome);
+            if (itens == null || !itens.Any())
+            {
+                return NotFound();
+            }
+
+            var produtos = _itemServices.ObterTodosProdutos().ToDictionary(p => p.id, p => p.cod_barra);
+
+            var resultado = itens.Select(item => new ItemBuscaViewModel
+            {
+                id = item.id,
+                nome = item.nome,
+                valor = item.valor,
+                cod_barra = produtos.ContainsKey(item.id) ? produtos[item.id] : null
+            });
+
+            return Ok(resultado);
+        }
+        
         //CONTROLLERS DE PRODUTO
 
         [HttpPost("produto")]

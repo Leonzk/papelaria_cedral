@@ -225,6 +225,32 @@ namespace papelaria_backend.Services
             return item;
         }
 
+        public IEnumerable<Entities.Item> BuscarItensPorNome(string parteNome)
+        {
+            var conn = _bd.CriarConexao();
+            MySqlCommand cmd = conn.CreateCommand();
+
+            cmd.CommandText = @"SELECT item_id, item_nome, item_valor FROM Item WHERE item_nome LIKE @parteNome";
+            cmd.Parameters.AddWithValue("@parteNome", "%" + parteNome + "%");
+
+            if (conn.State != System.Data.ConnectionState.Open)
+                conn.Open();
+
+            MySqlDataReader dr = cmd.ExecuteReader();
+            List<Entities.Item> itens = new List<Entities.Item>();
+            while (dr.Read())
+            {
+                itens.Add(new Entities.Item()
+                {
+                    id = Convert.ToInt32(dr["item_id"]),
+                    nome = dr["item_nome"].ToString(),
+                    valor = (float)dr["item_valor"]
+                });
+            }
+            conn.Close();
+            return itens;
+        }
+
         public Item.Produto? ObterProduto(int iditem)
         {
             var conn = _bd.CriarConexao();
