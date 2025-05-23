@@ -112,6 +112,31 @@ namespace papelaria_backend.ViewModel.Item
             }
         }
 
+        [HttpGet("produtos/buscar")]
+        public IActionResult BuscarProdutosPorNome([FromQuery] string nome)
+        {
+            var itens = _itemServices.BuscarItensPorNome(nome);
+            if (itens == null || !itens.Any())
+            {
+                return NotFound();
+            }
+
+            // Filtra apenas produtos (que existem na tabela Produto)
+            var produtos = _itemServices.ObterTodosProdutos().ToDictionary(p => p.id, p => p.cod_barra);
+
+            var resultado = itens
+                .Where(item => produtos.ContainsKey(item.id))
+                .Select(item => new
+                {
+                    id = item.id,
+                    nome = item.nome,
+                    valor = item.valor,
+                    cod_barra = produtos[item.id]
+                });
+
+            return Ok(resultado);
+        }
+
         [HttpPost("produto/atualizar/{id}")]
         public IActionResult AtualizarProduto([FromBody] ProdutoAtualizarViewModel produtoVM, int id)
         {

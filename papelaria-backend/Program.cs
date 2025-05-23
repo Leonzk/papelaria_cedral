@@ -26,6 +26,8 @@ builder.Services.AddScoped(typeof(papelaria_backend.Services.ItemServices));
 builder.Services.AddScoped(typeof(papelaria_backend.Services.EstoqueServices));
 builder.Services.AddScoped(typeof(papelaria_backend.Services.VendaServices));
 builder.Services.AddScoped(typeof(papelaria_backend.Services.ItemVendaServices));
+builder.Services.AddScoped(typeof(papelaria_backend.Services.VendaCaixaServices));
+builder.Services.AddScoped(typeof(papelaria_backend.Services.CaixaServices));
 
 builder.Services.AddSingleton<papelaria_backend.BD>(new papelaria_backend.BD());
 

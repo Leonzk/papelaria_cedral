@@ -63,7 +63,8 @@ export default function Postagens(props){
     const [stateVendas, setStateVendas] = useState([]);
     const [stateTotal, setStateTotal] = useState(0);
     const [filtro, setFiltro] = useState("");
-    
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
     const [topItems, setTopItems] = useState([]);
     const [vendasPorData, setVendasPorData] = useState([]);
     const [dataInicio, setDataInicio] = useState("");
@@ -233,6 +234,15 @@ export default function Postagens(props){
         },
     };
 
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
+
     async function handleGetGraficos(){
         if (dataInicio && dataFim) {
             fetchTopItems();
@@ -250,6 +260,33 @@ export default function Postagens(props){
             });
         }
     }
+
+    async function handleFiltroVendasPorData() {
+        if (dataInicio && dataFim) {
+            setLoading(true);
+            await fetch(`http://localhost:5218/api/venda/periodo/${dataInicio}/${dataFim}`)
+                .then(r => r.json())
+                .then(r => {
+                    setStateVendas(r);
+                    setStateTotal(r.length);
+                    setLoading(false);
+                    setPage(0);
+                })
+                .catch(() => setLoading(false));
+        } else {
+            toast.error("Por favor, selecione as datas de início e fim.", {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+            });
+        }
+    }
+
     async function handleFiltro(){
         console.log(filtro);
         if(filtro!=""){
@@ -420,7 +457,7 @@ export default function Postagens(props){
             console.log(servicoresp)
             console.log(servicoData)
             if(servicoData.id == 0 && servicoData.nome == null){
-                //significa que não é um serviço, verifica o estoque?
+                //significa que não é um serviço, verifica o estoque
                 console.log(valores[i])
                 const response = await fetch(`http://localhost:5218/api/estoque/${idEstoque}`);
                 const estoqueData = await response.json();
@@ -755,10 +792,34 @@ export default function Postagens(props){
                 <div>
                     <br></br>
                     <div className="input-group mb-3 w-100">
-                        <TextField onChange={handleFiltrar} value={filtro} type="text" className="form-control" id="standard-basic" label="Filtro" variant="standard"   />
-                        
-                        <Button variant="contained" color="primary" onClick={handleFiltro} className="ml-2">Pesquisar</Button>
-                    
+                        <TextField
+                            type="date"
+                            label="Data Inicial"
+                            value={dataInicio}
+                            onChange={(e) => setDataInicio(e.target.value)}
+                            InputLabelProps={{ shrink: true }}
+                            className="mr-3 styled-date-field"
+                            variant="outlined"
+                            size="small"
+                        />
+                        <TextField
+                            type="date"
+                            label="Data Final"
+                            value={dataFim}
+                            onChange={(e) => setDataFim(e.target.value)}
+                            InputLabelProps={{ shrink: true }}
+                            className="mr-3 styled-date-field"
+                            variant="outlined"
+                            size="small"
+                        />
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={handleFiltroVendasPorData}
+                            className="ml-2"
+                        >
+                            Filtrar por Data
+                        </Button>
                     </div>
                     <Table className="shadow p-5 mb-5 bg-white rounded">
                         <TableHead>
@@ -770,7 +831,9 @@ export default function Postagens(props){
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {stateVendas.map((item, index) => (
+                            {stateVendas
+                                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                .map((item, index) => (
                                 <TableRow key={index}>
                                     <TableCell><center>{item.id}</center></TableCell>
                                     <TableCell><center>{(item.data).substring(11,19)+" | "+(item.data).substring(0,10).split('-')[2] +"/"+(item.data).substring(0,10).split('-')[1] +"/"+(item.data).substring(0,10).split('-')[0]}</center></TableCell>
@@ -796,7 +859,16 @@ export default function Postagens(props){
                         <TableFooter>
                             <TableRow>
                                 <TableCell>Registros {stateVendas.length}/{stateTotal}</TableCell>
-                                <TablePagination rowsPerPage={20} page={0} count={stateItens.length}  />
+                                <TablePagination
+                                        rowsPerPageOptions={[5, 10, 25, 50]}
+                                        component="div"
+                                        count={stateVendas.length}
+                                        rowsPerPage={rowsPerPage}
+                                        page={page}
+                                        onChangePage={handleChangePage}
+                                        onChangeRowsPerPage={handleChangeRowsPerPage}
+                                        labelRowsPerPage="Vendas por página"
+                                    />
                             </TableRow>
                         </TableFooter>
                     </Table>

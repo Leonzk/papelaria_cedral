@@ -12,6 +12,8 @@ import { Box, Modal } from "@mui/material";
 import Divider from '@mui/material/Divider';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Postagens(props){
 
@@ -90,23 +92,49 @@ export default function Postagens(props){
         setStateEditar(false)
     }
 
-    async function handleEditarSalvar(id){
-        seterrorItem(false)
-            const requestOptions = {
-                method: 'POST',
-                body: JSON.stringify({quant: parseInt(stateItem.quant)}),
-                headers: new Headers({
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-                }),
-            };
+    async function handleEditarSalvar(id) {
+    seterrorItem(false);
+    const requestOptions = {
+        method: 'POST',
+        body: JSON.stringify({ quant: parseInt(stateItem.quant) }),
+        headers: new Headers({
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }),
+    };
 
-            const response = await fetch(`http://localhost:5218/api/estoque/atualizar/${id}`, requestOptions);
-            console.log(response);
-
-
-        setStateEditar(false)
-        alert("Estoque Atualizado Com Sucesso")
+    const response = await fetch(`http://localhost:5218/api/estoque/atualizar/${id}`, requestOptions);
+    if (response.ok) {
+        toast.success("Estoque atualizado com sucesso!", {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+        });
+        // Recarrega os estoques
+        fetch("http://localhost:5218/api/estoque")
+            .then(r => r.json())
+            .then(r => {
+                setStateItens(r);
+                setStateTotal(r.length);
+            });
+    } else {
+        toast.error("Erro ao atualizar estoque!", {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+        });
+    }
+        setStateEditar(false);
     }
 
     function handleNovoOpen(){
@@ -146,7 +174,7 @@ export default function Postagens(props){
   return (
     <div>
       <Cabecalho></Cabecalho>
-      
+      <ToastContainer />
       <div className="principal">
         <br></br>
         <div className="container w-100">
@@ -156,38 +184,67 @@ export default function Postagens(props){
                     </div>
                     ) : (
             <div className="flexcontainer w-100">
-                <Modal className="mx-auto" open={stateEditar} onClose={() => handleEditarClose()}>
-                    <Box className="rounded bg-white w-50 mt-5 shadow d-flex flex-column p-3 justify-content-center mx-auto">
-                        <div className="mb-3">
-                            <Divider>Atualizar Estoque</Divider>
-                        </div>
-                        <div className="form-body">
-                            <List className="d-flex flex-column mx-auto align-items-center">
-                                <ListItem>
-                                    <label htmlFor="quant" className="form-label">Quantidade</label>
-                                </ListItem>
-                                <ListItem>
-                                    <TextField
-                                        value={stateItem.quant}
-                                        onChange={(e) =>
-                                            setStateItem((stateItem) => ({
-                                                ...stateItem,
-                                                quant: e.target.value,
-                                            }))
-                                        }
-                                        type="number"
-                                        className="form-control"
-                                        id="quant"
-                                    />
-                                </ListItem>
-                            </List>
-                        </div>
-                        <div className="form-footer mt-3 d-flex justify-content-center">
+                <Modal className="mx-auto"
+                    open={stateEditar}
+                    onClose={handleEditarClose}
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backdropFilter: 'blur(2px)',
+                        
+                    }}
+                >
+                    <Box className="p-3"
+                    sx={{
+                        bgcolor: 'background.paper',
+                        borderRadius: 3,
+                        boxShadow: 24,
+                        minWidth: 350,
+                        maxWidth: 400,
+                        mx: 'auto',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: 2
+                    }}
+                >
+                        <Divider sx={{ width: '100%', mb: 2 }}>
+                            <b style={{ fontSize: 18, color: '#1976d2' }}>Atualizar Estoque</b>
+                        </Divider>
+                        <List className="d-flex flex-column mx-auto align-items-center" sx={{ width: '100%' }}>
+                            <ListItem>
+                                <label htmlFor="quant" className="form-label" style={{ fontWeight: 500 }}>Quantidade</label>
+                            </ListItem>
+                            <ListItem>
+                                <TextField
+                                    value={stateItem.quant}
+                                    onChange={(e) =>
+                                        setStateItem((stateItem) => ({
+                                            ...stateItem,
+                                            quant: e.target.value,
+                                        }))
+                                    }
+                                    type="number"
+                                    className="form-control"
+                                    id="quant"
+                                    variant="outlined"
+                                    size="small"
+                                    sx={{ width: '100%' }}
+                                />
+                            </ListItem>
+                        </List>
+                        <div className="form-footer mt-3 d-flex justify-content-center" style={{ width: '100%' }}>
                             <Button
-                                onClick={() => handleEditarSalvar(stateItemId)}
+                                onClick={async () => {
+                                    if (window.confirm("Tem certeza que deseja alterar a quantidade em estoque?")) {
+                                        await handleEditarSalvar(stateItemId);
+                                    }
+                                }}
                                 type="button"
                                 variant="contained"
                                 color="primary"
+                                sx={{ width: '100%', fontWeight: 600, fontSize: 16, py: 1.2 }}
                             >
                                 Alterar
                             </Button>

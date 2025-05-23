@@ -230,7 +230,7 @@ namespace papelaria_backend.Services
             var conn = _bd.CriarConexao();
             MySqlCommand cmd = conn.CreateCommand();
 
-            cmd.CommandText = @"SELECT item_id, item_nome, item_valor FROM Item WHERE item_nome LIKE @parteNome";
+            cmd.CommandText = @"SELECT item_id, item_nome, item_valor FROM Item WHERE LOWER(item_nome) LIKE LOWER(@parteNome)";
             cmd.Parameters.AddWithValue("@parteNome", "%" + parteNome + "%");
 
             if (conn.State != System.Data.ConnectionState.Open)

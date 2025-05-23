@@ -47,17 +47,10 @@ export default function Postagens(props){
 
     async function handleFiltro(){
         if(filtro!=""){
-            await fetch("http://localhost:5218/api/item/produto")
+            await fetch("http://localhost:5218/api/item/produtos/buscar?nome="+filtro)
             .then(r => r.json())
             .then(r =>{
-                var newArray = r.filter(function (item){
-                    return item.nome.includes(filtro) ||
-                            item.cod_barra.includes(filtro) ||
-                            item.id == filtro
-                });
-                console.log(newArray);
-                setStateItens(newArray);
-                console.log(r);
+                setStateItens(r);
             });
         }
         else{
