@@ -15,6 +15,11 @@
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
+# script sql para montar a base de dados
+papelaria_cedral_script.sql
+
+mysql-data/
+
 # Mono auto generated files
 mono_crash.*
 
